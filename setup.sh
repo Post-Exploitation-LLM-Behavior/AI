@@ -6,7 +6,7 @@ ROOT="$(pwd)"
 echo "=== Setting up all three MCPs ==="
 
 # ============================================================
-# Metasploit MCP — via pipx
+# 1. Metasploit MCP — via pipx
 # ============================================================
 echo ""
 echo "----------------------------------------"
@@ -36,13 +36,14 @@ echo "[+] Installing mcp-pymetasploit3 via pipx..."
 pipx install mcp-pymetasploit3 --force
 
 # ============================================================
-# HexStrike MCP — system pip with --break-system-packages
+# 2. HexStrike MCP + Flask API backend
 # ============================================================
 echo ""
 echo "----------------------------------------"
 echo " Setting up: HexStrike MCP"
 echo "----------------------------------------"
 
+# ---- MCP bridge script ----
 if [ ! -f "$ROOT/hexstrike_mcp_server.py" ]; then
     echo "[+] Cloning HexStrike MCP server..."
     if ! command -v git &> /dev/null; then
@@ -57,11 +58,39 @@ else
     echo "[OK] hexstrike_mcp_server.py already present."
 fi
 
-echo "[+] Installing HexStrike Python deps system-wide..."
-pip3 install --break-system-packages requests fastmcp
+# ---- MCP bridge Python deps ----
+echo "[+] Installing HexStrike MCP Python deps system-wide..."
+python3 -m pip install --break-system-packages requests fastmcp
+
+if ! python3 -c "import fastmcp, requests" 2>/dev/null; then
+    echo "[!] fastmcp or requests failed to import after install."
+    exit 1
+fi
+echo "[OK] fastmcp and requests importable."
+
+# ---- Flask API backend ----
+HEXSTRIKE_API_REPO="$ROOT/hexstrike-ai"
+
+if [ ! -d "$HEXSTRIKE_API_REPO" ]; then
+    echo "[+] Cloning HexStrike Flask API backend..."
+    git clone https://github.com/0x4m4/hexstrike-ai.git "$HEXSTRIKE_API_REPO"
+else
+    echo "[OK] HexStrike Flask API repo already present."
+fi
+
+if [ -f "$HEXSTRIKE_API_REPO/requirements.txt" ]; then
+    echo "[+] Installing HexStrike Flask API deps..."
+    python3 -m pip install --break-system-packages -r "$HEXSTRIKE_API_REPO/requirements.txt"
+else
+    echo "[!] No requirements.txt found in $HEXSTRIKE_API_REPO"
+fi
+
+if [ ! -f "$HEXSTRIKE_API_REPO/hexstrike_server.py" ]; then
+    echo "[!] WARNING: hexstrike_server.py not found in $HEXSTRIKE_API_REPO"
+fi
 
 # ============================================================
-# PentestGPT MCP — needs Python 3.11
+# 3. PentestGPT MCP — needs Python 3.11
 # ============================================================
 echo ""
 echo "----------------------------------------"
@@ -82,93 +111,59 @@ fi
 # ---- Clone the repo ----
 if [ ! -d "$PENTESTGPT_REPO" ]; then
     echo "[+] Cloning PentestGPT-MCP..."
-    if ! command -v git &> /dev/null; then
-        echo "[!] git missing. Run: sudo apt install git"
-        exit 1
-    fi
     git clone https://github.com/yuhano/PentestGPT-MCP.git "$PENTESTGPT_REPO"
 else
     echo "[OK] PentestGPT-MCP already cloned."
 fi
 
-# ---- Ensure Python 3.11 is available ----
-ensure_python311() {
-    # Already available?
-    if command -v python3.11 &> /dev/null; then
-        echo "[OK] python3.11 already installed."
-        return 0
-    fi
+# ---- Ensure Python 3.11 ----
+PY311_READY=1
 
-    echo "[+] python3.11 not found. Installing via deadsnakes PPA..."
-
-    # software-properties-common provides add-apt-repository
+if command -v python3.11 &> /dev/null; then
+    echo "[OK] python3.11 already installed."
+else
+    echo "[+] Installing python3.11 via deadsnakes PPA..."
     if ! command -v add-apt-repository &> /dev/null; then
-        echo "[+] Installing software-properties-common..."
         sudo apt update && sudo apt install -y software-properties-common
     fi
-
-    echo "[+] Adding deadsnakes PPA..."
-    sudo add-apt-repository -y ppa:deadsnakes/ppa
-    sudo apt update
-
-    echo "[+] Installing python3.11, python3.11-venv, python3.11-dev..."
-    if ! sudo apt install -y python3.11 python3.11-venv python3.11-dev; then
-        echo "[!] deadsnakes install failed."
-        echo "    Your Ubuntu release may not be supported by deadsnakes yet."
-        echo "    Alternative: install pyenv and its build dependencies, then:"
-        echo "      sudo apt install -y make build-essential libssl-dev zlib1g-dev \\"
-        echo "        libbz2-dev libreadline-dev libsqlite3-dev wget curl llvm \\"
-        echo "        libncursesw5-dev xz-utils tk-dev libxml2-dev libxmlsec1-dev \\"
-        echo "        libffi-dev liblzma-dev"
-        echo "      curl https://pyenv.run | bash"
-        echo "      pyenv install 3.11.9"
-        exit 1
-    fi
-
-    if ! command -v python3.11 &> /dev/null; then
-        echo "[!] python3.11 still not on PATH after install."
-        exit 1
-    fi
-    echo "[OK] python3.11 installed."
-}
-
-ensure_python311
-
-# ---- Clean up any failed pyenv build artifacts ----
-if [ -d /tmp ] && ls /tmp/python-build.* 1> /dev/null 2>&1; then
-    echo "[+] Removing stale pyenv build artifacts..."
-    rm -rf /tmp/python-build.*
-fi
-
-# ---- Create or recreate the venv with Python 3.11 ----
-RECREATE_VENV=0
-if [ -d "$PENTESTGPT_REPO/venv" ]; then
-    VENV_PY_VERSION="$("$PENTESTGPT_REPO/venv/bin/python3" --version 2>/dev/null || echo "unknown")"
-    if [[ "$VENV_PY_VERSION" != *"3.11"* ]]; then
-        echo "[!] Existing venv uses $VENV_PY_VERSION, not 3.11. Recreating..."
-        RECREATE_VENV=1
+    if sudo add-apt-repository -y ppa:deadsnakes/ppa && \
+       sudo apt update && \
+       sudo apt install -y python3.11 python3.11-venv python3.11-dev; then
+        echo "[OK] python3.11 installed."
+    else
+        echo "[!] Could not install python3.11."
+        echo "    PentestGPT-MCP setup will be SKIPPED."
+        echo "    Install python3.11 manually, then re-run setup.sh."
+        PY311_READY=0
     fi
 fi
 
-if [ "$RECREATE_VENV" -eq 1 ] || [ ! -d "$PENTESTGPT_REPO/venv" ]; then
-    rm -rf "$PENTESTGPT_REPO/venv"
-    echo "[+] Creating venv for PentestGPT-MCP with Python 3.11..."
-    python3.11 -m venv "$PENTESTGPT_REPO/venv"
+if [ "$PY311_READY" -eq 1 ]; then
+    # Recreate venv if it used the wrong Python
+    if [ -d "$PENTESTGPT_REPO/venv" ]; then
+        VENV_PY_VERSION="$("$PENTESTGPT_REPO/venv/bin/python3" --version 2>/dev/null || echo "unknown")"
+        if [[ "$VENV_PY_VERSION" != *"3.11"* ]]; then
+            echo "[!] Existing venv uses $VENV_PY_VERSION. Recreating..."
+            rm -rf "$PENTESTGPT_REPO/venv"
+        fi
+    fi
+
+    if [ ! -d "$PENTESTGPT_REPO/venv" ]; then
+        python3.11 -m venv "$PENTESTGPT_REPO/venv"
+    fi
+
+    echo "[+] Installing PentestGPT-MCP deps..."
+    "$PENTESTGPT_REPO/venv/bin/pip" install --upgrade pip
+    "$PENTESTGPT_REPO/venv/bin/pip" install -r "$PENTESTGPT_REPO/requirements.txt"
+
+    if [ ! -f "$PENTEST_TOOLS_SCRIPT" ]; then
+        echo "[!] ERROR: pentest_tools_server.py not found."
+    else
+        echo "[OK] PentestGPT server script found."
+    fi
 else
-    echo "[OK] PentestGPT-MCP venv already uses Python 3.11."
+    echo "[SKIP] PentestGPT-MCP setup incomplete."
 fi
-
-# ---- Install requirements (gpt4all now installable on 3.11) ----
-echo "[+] Installing PentestGPT-MCP deps..."
-"$PENTESTGPT_REPO/venv/bin/pip" install --upgrade pip
-"$PENTESTGPT_REPO/venv/bin/pip" install -r "$PENTESTGPT_REPO/requirements.txt"
-
-# ---- Verify ----
-if [ ! -f "$PENTEST_TOOLS_SCRIPT" ]; then
-    echo "[!] ERROR: pentest_tools_server.py not found."
-    exit 1
-fi
-echo "[OK] PentestGPT server script found."
 
 # ============================================================
 # Summary
@@ -191,7 +186,18 @@ echo "    $PENTESTGPT_REPO/venv/bin/python3"
 echo "  pentestgpt -> args (first item):"
 echo "    $PENTEST_TOOLS_SCRIPT"
 echo ""
-echo "Start services manually before running each agent:"
-echo "  Metasploit:  msfrpcd -P yourpassword -p 55553 -n"
-echo "  HexStrike:   python3 hexstrike_server.py   (Flask API)"
-echo "  PentestGPT:  (none — nmap/dirb are on PATH)"
+echo "--------------------------------------------------------"
+echo "MANUAL STEPS — run these in separate terminals each session:"
+echo "--------------------------------------------------------"
+echo ""
+echo "  1. Metasploit RPC daemon:"
+echo "       msfrpcd -P yourpassword -p 55553 -n"
+echo ""
+echo "  2. HexStrike Flask API backend:"
+echo "       python3 $HEXSTRIKE_API_REPO/hexstrike_server.py"
+echo ""
+echo "  3. PentestGPT: nothing to start (nmap/dirb are on PATH)."
+echo ""
+echo "Then run:"
+echo "    python3 verify_mcp.py"
+echo "    python3 run_agent.py"
