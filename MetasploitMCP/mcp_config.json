@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "mcp-pymetasploit3": {
+      "command": "mcp-pymetasploit3",
+      "env": {}
+    }
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "hexstrike": {
+      "command": "python3",
+      "args": [
+        "hexstrike_mcp_server.py",
+        "--host", "0.0.0.0",
+        "--port", "8889",
+        "--api-url", "http://localhost:8888"
+      ],
+      "env": {}
+    }
+  }
+}
