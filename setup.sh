@@ -1,32 +1,30 @@
 #!/bin/bash
 set -e
 
-echo "=== Initializing MCP Environment Setup (Ubuntu) ==="
+ROOT="$(pwd)"
 
-# Get the absolute path of the project root to configure the MCP servers
-PROJECT_ROOT="$(pwd)"
-PENTESTGPT_DIR="$PROJECT_ROOT/tools/PentestGPT-MCP"
-PENTEST_TOOLS_SCRIPT="$PENTESTGPT_DIR/mcp_servers/pentest_tools_server.py"
-HEXSTRIKE_MCP_DIR="$PROJECT_ROOT/tools/hexstrike-mcp"
-HEXSTRIKE_MCP_SCRIPT="$HEXSTRIKE_MCP_DIR/hexstrike_mcp_server.py"
+echo "=== Setting up all three MCPs (no manual venvs) ==="
 
 # ============================================================
-# 1. Install core system dependencies (nmap, dirb) via apt
+# Metasploit MCP — via pipx
 # ============================================================
-echo "[+] Checking for nmap and dirb (required for PentestGPT tools)..."
-if ! command -v nmap &> /dev/null || ! command -v dirb &> /dev/null; then
-    echo "[+] Installing nmap and dirb via apt..."
-    sudo apt update && sudo apt install -y nmap dirb
-else
-    echo "[OK] nmap and dirb are already installed."
+echo ""
+echo "----------------------------------------"
+echo " Setting up: Metasploit MCP (pipx)"
+echo "----------------------------------------"
+
+if ! command -v pipx &> /dev/null; then
+    echo "[+] Installing pipx..."
+    sudo apt update && sudo apt install -y pipx
+    pipx ensurepath
 fi
 
-# ============================================================
-# 2. Install Metasploit Framework (if not present)
-# ============================================================
-echo "[+] Checking for Metasploit Framework..."
 if ! command -v msfconsole &> /dev/null; then
-    echo "[+] Installing Metasploit via official Rapid7 installer..."
+    echo "[+] Installing Metasploit via Rapid7 installer..."
+    if ! command -v curl &> /dev/null; then
+        echo "[!] curl missing. Run: sudo apt install curl"
+        exit 1
+    fi
     curl -fsSL https://raw.githubusercontent.com/rapid7/metasploit-omnibus/master/config/templates/metasploit-framework-wrappers/msfupdate.erb > /tmp/msfinstall
     chmod 755 /tmp/msfinstall
     sudo /tmp/msfinstall
@@ -34,88 +32,91 @@ else
     echo "[OK] Metasploit already installed."
 fi
 
-# ============================================================
-# 3. Setup Python dependencies (Core + mcp-pymetasploit3)
-# ============================================================
-echo "[+] Installing core Python dependencies..."
-pip install -r requirements.txt
-pip install mcp-pymetasploit3
+echo "[+] Installing mcp-pymetasploit3 via pipx..."
+pipx install mcp-pymetasploit3 --force
 
 # ============================================================
-# 4. Clone and setup yuhano/PentestGPT-MCP (Idempotent)
+# HexStrike MCP — system pip with --break-system-packages
 # ============================================================
-if [ ! -d "$PENTESTGPT_DIR" ]; then
-    echo "[+] Cloning PentestGPT-MCP repository into tools/..."
-    mkdir -p "$PROJECT_ROOT/tools"
-    git clone https://github.com/yuhano/PentestGPT-MCP.git "$PENTESTGPT_DIR"
+echo ""
+echo "----------------------------------------"
+echo " Setting up: HexStrike MCP"
+echo "----------------------------------------"
+
+if [ ! -f "$ROOT/hexstrike_mcp_server.py" ]; then
+    echo "[+] Cloning HexStrike MCP server..."
+    if ! command -v git &> /dev/null; then
+        echo "[!] git missing. Run: sudo apt install git"
+        exit 1
+    fi
+    TMPDIR=$(mktemp -d)
+    git clone https://github.com/b-bogus/hexstrike-ai_mcp_server.git "$TMPDIR"
+    cp "$TMPDIR/hexstrike_mcp_server.py" "$ROOT/"
+    rm -rf "$TMPDIR"
 else
-    echo "[OK] PentestGPT-MCP directory already exists."
+    echo "[OK] hexstrike_mcp_server.py already present."
 fi
 
-# Setup the virtual environment for PentestGPT-MCP if it doesn't exist
-if [ ! -d "$PENTESTGPT_DIR/venv" ]; then
-    echo "[+] Creating Python virtual environment for PentestGPT-MCP..."
-    python3 -m venv "$PENTESTGPT_DIR/venv"
+echo "[+] Installing HexStrike Python deps system-wide..."
+pip3 install --break-system-packages requests fastmcp
+
+# ============================================================
+# PentestGPT MCP — keeps its own venv (repo default)
+# ============================================================
+echo ""
+echo "----------------------------------------"
+echo " Setting up: PentestGPT MCP"
+echo "----------------------------------------"
+
+PENTESTGPT_REPO="$ROOT/PentestGPT-MCP"
+PENTEST_TOOLS_SCRIPT="$PENTESTGPT_REPO/mcp_servers/pentest_tools_server.py"
+
+if ! command -v nmap &> /dev/null || ! command -v dirb &> /dev/null; then
+    echo "[+] Installing nmap and dirb..."
+    sudo apt update && sudo apt install -y nmap dirb
 else
-    echo "[OK] PentestGPT-MCP venv already exists."
+    echo "[OK] nmap and dirb already installed."
 fi
 
-# Install the requirements into the venv
-echo "[+] Installing PentestGPT-MCP Python dependencies..."
-"$PENTESTGPT_DIR/venv/bin/pip" install -r "$PENTESTGPT_DIR/requirements.txt"
-
-# ============================================================
-# 5. Clone and setup HexStrike MCP server (Idempotent)
-# ============================================================
-if [ ! -d "$HEXSTRIKE_MCP_DIR" ]; then
-    echo "[+] Cloning HexStrike MCP server into tools/..."
-    mkdir -p "$PROJECT_ROOT/tools"
-    git clone https://github.com/b-bogus/hexstrike-ai_mcp_server.git "$HEXSTRIKE_MCP_DIR"
+if [ ! -d "$PENTESTGPT_REPO" ]; then
+    echo "[+] Cloning PentestGPT-MCP..."
+    git clone https://github.com/yuhano/PentestGPT-MCP.git "$PENTESTGPT_REPO"
 else
-    echo "[OK] HexStrike MCP directory already exists."
+    echo "[OK] PentestGPT-MCP already cloned."
 fi
 
-echo "[+] Installing HexStrike MCP Python dependencies..."
-pip install requests fastmcp
-
-# ============================================================
-# 6. Final Verification
-# ============================================================
-echo "[+] Verifying PentestGPT MCP server script..."
-if [ ! -f "$PENTEST_TOOLS_SCRIPT" ]; then
-    echo "[!] ERROR: pentest_tools_server.py not found at expected location."
-    exit 1
-fi
-echo "[OK] PentestGPT MCP server script found."
-
-echo "[+] Verifying HexStrike MCP server script..."
-if [ ! -f "$HEXSTRIKE_MCP_SCRIPT" ]; then
-    echo "[!] WARNING: hexstrike_mcp_server.py not found at expected location."
-    echo "    Expected: $HEXSTRIKE_MCP_SCRIPT"
+if [ ! -d "$PENTESTGPT_REPO/venv" ]; then
+    echo "[+] Creating venv for PentestGPT-MCP (repo default)..."
+    python3 -m venv "$PENTESTGPT_REPO/venv"
 else
-    echo "[OK] HexStrike MCP server script found."
+    echo "[OK] PentestGPT-MCP venv exists."
 fi
 
+echo "[+] Installing PentestGPT-MCP deps into its venv..."
+"$PENTESTGPT_REPO/venv/bin/pip" install -r "$PENTESTGPT_REPO/requirements.txt"
+
 # ============================================================
-# 7. Reminders for manual steps
+# Summary
 # ============================================================
 echo ""
-echo "=== Setup Complete ==="
+echo "=== All setups complete ==="
 echo ""
-echo "Before running run_agent.py, complete these manual steps:"
+echo "mcp_config.json settings:"
 echo ""
-echo "  1. Update 'mcp_config.json' -> 'pentestgpt' -> 'args' to:"
-echo "       [\"$PENTEST_TOOLS_SCRIPT\"]"
+echo "  metasploit -> command:"
+echo "    mcp-pymetasploit3"
 echo ""
-echo "  2. Update 'mcp_config.json' -> 'hexstrike' -> 'args' to point to:"
-echo "       $HEXSTRIKE_MCP_SCRIPT"
+echo "  hexstrike -> command:"
+echo "    python3"
+echo "  hexstrike -> args (first item):"
+echo "    $ROOT/hexstrike_mcp_server.py"
 echo ""
-echo "  3. Start Metasploit RPC daemon (in a separate terminal):"
-echo "       msfrpcd -P yourpassword -p 55553 -n"
+echo "  pentestgpt -> command:"
+echo "    $PENTESTGPT_REPO/venv/bin/python3"
+echo "  pentestgpt -> args (first item):"
+echo "    $PENTEST_TOOLS_SCRIPT"
 echo ""
-echo "  4. Start HexStrike Flask API backend (in a separate terminal):"
-echo "       python3 hexstrike_server.py   # from the 0x4m4/hexstrike-ai repo"
-echo ""
-echo "  5. Verify the environment with:"
-echo "       python3 verify_mcp.py"
-echo ""
+echo "Start services manually before running each agent:"
+echo "  Metasploit:  msfrpcd -P yourpassword -p 55553 -n"
+echo "  HexStrike:   python3 hexstrike_server.py   (Flask API)"
+echo "  PentestGPT:  (none — nmap/dirb are on PATH)"
