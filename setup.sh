@@ -6,6 +6,18 @@ ROOT="$(pwd)"
 echo "=== Setting up all three MCPs ==="
 
 # ============================================================
+# 0. System build dependencies (for Python C extensions)
+# ============================================================
+echo ""
+echo "----------------------------------------"
+echo " Installing system build dependencies"
+echo "----------------------------------------"
+
+echo "[+] Installing python3-dev, libffi-dev, build-essential..."
+sudo apt update
+sudo apt install -y python3-dev libffi-dev build-essential
+
+# ============================================================
 # 1. Metasploit MCP — via pipx
 # ============================================================
 echo ""
@@ -15,7 +27,7 @@ echo "----------------------------------------"
 
 if ! command -v pipx &> /dev/null; then
     echo "[+] Installing pipx..."
-    sudo apt update && sudo apt install -y pipx
+    sudo apt install -y pipx
     pipx ensurepath
 fi
 
@@ -103,7 +115,7 @@ PENTEST_TOOLS_SCRIPT="$PENTESTGPT_REPO/mcp_servers/pentest_tools_server.py"
 # ---- Host tools ----
 if ! command -v nmap &> /dev/null || ! command -v dirb &> /dev/null; then
     echo "[+] Installing nmap and dirb..."
-    sudo apt update && sudo apt install -y nmap dirb
+    sudo apt install -y nmap dirb
 else
     echo "[OK] nmap and dirb already installed."
 fi
@@ -124,7 +136,7 @@ if command -v python3.11 &> /dev/null; then
 else
     echo "[+] Installing python3.11 via deadsnakes PPA..."
     if ! command -v add-apt-repository &> /dev/null; then
-        sudo apt update && sudo apt install -y software-properties-common
+        sudo apt install -y software-properties-common
     fi
     if sudo add-apt-repository -y ppa:deadsnakes/ppa && \
        sudo apt update && \
@@ -133,7 +145,6 @@ else
     else
         echo "[!] Could not install python3.11."
         echo "    PentestGPT-MCP setup will be SKIPPED."
-        echo "    Install python3.11 manually, then re-run setup.sh."
         PY311_READY=0
     fi
 fi
@@ -185,6 +196,19 @@ echo "  pentestgpt -> command:"
 echo "    $PENTESTGPT_REPO/venv/bin/python3"
 echo "  pentestgpt -> args (first item):"
 echo "    $PENTEST_TOOLS_SCRIPT"
+echo ""
+echo "--------------------------------------------------------"
+echo "Shell PATH check"
+echo "--------------------------------------------------------"
+if echo "$PATH" | grep -q "$HOME/.local/bin"; then
+    echo "[OK] ~/.local/bin is already on PATH."
+else
+    echo "[!] ~/.local/bin is NOT on PATH."
+    echo "    Run this once, then open a new terminal:"
+    echo ""
+    echo "      echo 'export PATH=\"\$HOME/.local/bin:\$PATH\"' >> ~/.bashrc"
+    echo "      source ~/.bashrc"
+fi
 echo ""
 echo "--------------------------------------------------------"
 echo "MANUAL STEPS — run these in separate terminals each session:"

@@ -2,6 +2,8 @@ THIS IS FOR CONFIGURING ALL 3 MCP SERVERS AT THE SAME TIME
 
 In order, run: 
 
+install python, curl, and git
+
 1. 
 chmod +x setup.sh
 ./setup.sh 
