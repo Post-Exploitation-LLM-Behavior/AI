@@ -3,7 +3,7 @@ set -e
 
 ROOT="$(pwd)"
 
-echo "=== Setting up all three MCPs (no manual venvs) ==="
+echo "=== Setting up all three MCPs ==="
 
 # ============================================================
 # Metasploit MCP — via pipx
@@ -61,7 +61,7 @@ echo "[+] Installing HexStrike Python deps system-wide..."
 pip3 install --break-system-packages requests fastmcp
 
 # ============================================================
-# PentestGPT MCP — venv using Python 3.11
+# PentestGPT MCP — needs Python 3.11
 # ============================================================
 echo ""
 echo "----------------------------------------"
@@ -71,7 +71,7 @@ echo "----------------------------------------"
 PENTESTGPT_REPO="$ROOT/PentestGPT-MCP"
 PENTEST_TOOLS_SCRIPT="$PENTESTGPT_REPO/mcp_servers/pentest_tools_server.py"
 
-# Host tools
+# ---- Host tools ----
 if ! command -v nmap &> /dev/null || ! command -v dirb &> /dev/null; then
     echo "[+] Installing nmap and dirb..."
     sudo apt update && sudo apt install -y nmap dirb
@@ -79,7 +79,7 @@ else
     echo "[OK] nmap and dirb already installed."
 fi
 
-# Clone the repo
+# ---- Clone the repo ----
 if [ ! -d "$PENTESTGPT_REPO" ]; then
     echo "[+] Cloning PentestGPT-MCP..."
     if ! command -v git &> /dev/null; then
@@ -91,43 +91,56 @@ else
     echo "[OK] PentestGPT-MCP already cloned."
 fi
 
-# ---- Determine which Python 3.11 interpreter to use ----
-PY311=""
-
-if command -v pyenv &> /dev/null; then
-    # Check if pyenv has a 3.11.x installed
-    if pyenv versions --bare | grep -q "^3\.11"; then
-        PY311="$(pyenv root)/versions/$(pyenv versions --bare | grep '^3\.11' | head -n1)/bin/python3"
+# ---- Ensure Python 3.11 is available ----
+ensure_python311() {
+    # Already available?
+    if command -v python3.11 &> /dev/null; then
+        echo "[OK] python3.11 already installed."
+        return 0
     fi
+
+    echo "[+] python3.11 not found. Installing via deadsnakes PPA..."
+
+    # software-properties-common provides add-apt-repository
+    if ! command -v add-apt-repository &> /dev/null; then
+        echo "[+] Installing software-properties-common..."
+        sudo apt update && sudo apt install -y software-properties-common
+    fi
+
+    echo "[+] Adding deadsnakes PPA..."
+    sudo add-apt-repository -y ppa:deadsnakes/ppa
+    sudo apt update
+
+    echo "[+] Installing python3.11, python3.11-venv, python3.11-dev..."
+    if ! sudo apt install -y python3.11 python3.11-venv python3.11-dev; then
+        echo "[!] deadsnakes install failed."
+        echo "    Your Ubuntu release may not be supported by deadsnakes yet."
+        echo "    Alternative: install pyenv and its build dependencies, then:"
+        echo "      sudo apt install -y make build-essential libssl-dev zlib1g-dev \\"
+        echo "        libbz2-dev libreadline-dev libsqlite3-dev wget curl llvm \\"
+        echo "        libncursesw5-dev xz-utils tk-dev libxml2-dev libxmlsec1-dev \\"
+        echo "        libffi-dev liblzma-dev"
+        echo "      curl https://pyenv.run | bash"
+        echo "      pyenv install 3.11.9"
+        exit 1
+    fi
+
+    if ! command -v python3.11 &> /dev/null; then
+        echo "[!] python3.11 still not on PATH after install."
+        exit 1
+    fi
+    echo "[OK] python3.11 installed."
+}
+
+ensure_python311
+
+# ---- Clean up any failed pyenv build artifacts ----
+if [ -d /tmp ] && ls /tmp/python-build.* 1> /dev/null 2>&1; then
+    echo "[+] Removing stale pyenv build artifacts..."
+    rm -rf /tmp/python-build.*
 fi
 
-if [ -z "$PY311" ] && command -v python3.11 &> /dev/null; then
-    PY311="$(command -v python3.11)"
-fi
-
-if [ -z "$PY311" ]; then
-    echo "[!] Python 3.11 not found."
-    echo ""
-    echo "    PentestGPT's requirements pin gpt4all==2.8.2, which only has"
-    echo "    wheels for Python <3.12. Your system Python is too new."
-    echo ""
-    echo "    Install Python 3.11 first, then re-run this script:"
-    echo ""
-    echo "      Option A (deadsnakes PPA):"
-    echo "        sudo add-apt-repository ppa:deadsnakes/ppa"
-    echo "        sudo apt update"
-    echo "        sudo apt install python3.11 python3.11-venv"
-    echo ""
-    echo "      Option B (pyenv):"
-    echo "        curl https://pyenv.run | bash"
-    echo "        pyenv install 3.11.9"
-    echo ""
-    exit 1
-fi
-
-echo "[+] Using Python 3.11 at: $PY311"
-
-# ---- Recreate venv if it was built with the wrong Python ----
+# ---- Create or recreate the venv with Python 3.11 ----
 RECREATE_VENV=0
 if [ -d "$PENTESTGPT_REPO/venv" ]; then
     VENV_PY_VERSION="$("$PENTESTGPT_REPO/venv/bin/python3" --version 2>/dev/null || echo "unknown")"
@@ -140,21 +153,15 @@ fi
 if [ "$RECREATE_VENV" -eq 1 ] || [ ! -d "$PENTESTGPT_REPO/venv" ]; then
     rm -rf "$PENTESTGPT_REPO/venv"
     echo "[+] Creating venv for PentestGPT-MCP with Python 3.11..."
-    "$PY311" -m venv "$PENTESTGPT_REPO/venv"
+    python3.11 -m venv "$PENTESTGPT_REPO/venv"
 else
     echo "[OK] PentestGPT-MCP venv already uses Python 3.11."
 fi
 
-# ---- Install requirements, skipping gpt4all ----
-echo "[+] Installing PentestGPT-MCP deps (skipping gpt4all)..."
-REQS="$PENTESTGPT_REPO/requirements.txt"
-FILTERED_REQS="$(mktemp)"
-grep -v -E '^\s*gpt4all' "$REQS" > "$FILTERED_REQS"
-
+# ---- Install requirements (gpt4all now installable on 3.11) ----
+echo "[+] Installing PentestGPT-MCP deps..."
 "$PENTESTGPT_REPO/venv/bin/pip" install --upgrade pip
-"$PENTESTGPT_REPO/venv/bin/pip" install -r "$FILTERED_REQS"
-
-rm -f "$FILTERED_REQS"
+"$PENTESTGPT_REPO/venv/bin/pip" install -r "$PENTESTGPT_REPO/requirements.txt"
 
 # ---- Verify ----
 if [ ! -f "$PENTEST_TOOLS_SCRIPT" ]; then
@@ -188,7 +195,3 @@ echo "Start services manually before running each agent:"
 echo "  Metasploit:  msfrpcd -P yourpassword -p 55553 -n"
 echo "  HexStrike:   python3 hexstrike_server.py   (Flask API)"
 echo "  PentestGPT:  (none — nmap/dirb are on PATH)"
-echo ""
-echo "NOTE: gpt4all was skipped during install. PentestGPT only needs it"
-echo "      for local model inference. Your agent uses the GenAI gateway,"
-echo "      so the PentestGPT tool server should work without it."

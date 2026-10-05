@@ -18,7 +18,6 @@ genai_client = AsyncOpenAI(
     api_key=os.getenv("GENAI_API_KEY"),
 )
 
-
 async def run_autonomous_agent(
     user_input: str,
     model_name: str,
