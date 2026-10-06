@@ -100,7 +100,7 @@ if [ ! -f "$HEXSTRIKE_API_REPO/hexstrike_server.py" ]; then
     echo "[!] WARNING: hexstrike_server.py not found in $HEXSTRIKE_API_REPO"
 fi
 
-# Ensure Python 3.11 exists first (HexStrike API needs it for prebuilt wheels)
+# Ensure Python 3.11 exists (needed for HexStrike API wheels)
 PY311_FOR_HS=1
 if ! command -v python3.11 &> /dev/null; then
     echo "[+] Installing python3.11 for HexStrike venv..."
@@ -118,7 +118,6 @@ if ! command -v python3.11 &> /dev/null; then
 fi
 
 if [ "$PY311_FOR_HS" -eq 1 ]; then
-    # Create venv if missing
     if [ ! -d "$HEXSTRIKE_VENV" ]; then
         echo "[+] Creating HexStrike API venv with Python 3.11..."
         python3.11 -m venv "$HEXSTRIKE_VENV"
@@ -130,7 +129,6 @@ if [ "$PY311_FOR_HS" -eq 1 ]; then
         echo "[+] Launching HexStrike API dependency install in background..."
         echo "    Log: $HEXSTRIKE_INSTALL_LOG"
 
-        # Run pip install in the background
         nohup "$HEXSTRIKE_VENV/bin/pip" install --upgrade pip \
             > "$HEXSTRIKE_INSTALL_LOG" 2>&1 &
         echo $! > "$ROOT/.hexstrike-install.pid"
@@ -146,7 +144,7 @@ if [ "$PY311_FOR_HS" -eq 1 ]; then
 fi
 
 # ============================================================
-# 4. PentestGPT MCP — Python 3.11 venv
+# 4. PentestGPT MCP — Python 3.11 venv, gpt4all filtered out
 # ============================================================
 echo ""
 echo "----------------------------------------"
@@ -202,9 +200,15 @@ if [ "$PY311_READY" -eq 1 ]; then
         python3.11 -m venv "$PENTESTGPT_REPO/venv"
     fi
 
-    echo "[+] Installing PentestGPT-MCP deps..."
+    echo "[+] Installing PentestGPT-MCP deps (skipping gpt4all)..."
+    REQS="$PENTESTGPT_REPO/requirements.txt"
+    FILTERED_REQS="$(mktemp)"
+    grep -v -E '^\s*gpt4all' "$REQS" > "$FILTERED_REQS"
+
     "$PENTESTGPT_REPO/venv/bin/pip" install --upgrade pip
-    "$PENTESTGPT_REPO/venv/bin/pip" install -r "$PENTESTGPT_REPO/requirements.txt"
+    "$PENTESTGPT_REPO/venv/bin/pip" install -r "$FILTERED_REQS"
+
+    rm -f "$FILTERED_REQS"
 
     if [ ! -f "$PENTEST_TOOLS_SCRIPT" ]; then
         echo "[!] ERROR: pentest_tools_server.py not found."
