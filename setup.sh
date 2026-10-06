@@ -129,13 +129,13 @@ if [ "$PY311_FOR_HS" -eq 1 ]; then
         echo "[+] Launching HexStrike API dependency install in background..."
         echo "    Log: $HEXSTRIKE_INSTALL_LOG"
 
-        nohup "$HEXSTRIKE_VENV/bin/pip" install --upgrade pip \
-            > "$HEXSTRIKE_INSTALL_LOG" 2>&1 &
+        # Sequential: upgrade pip first, then install requirements
+        nohup bash -c "
+            '$HEXSTRIKE_VENV/bin/pip' install --upgrade pip setuptools wheel && \
+            '$HEXSTRIKE_VENV/bin/pip' install -r '$HEXSTRIKE_API_REPO/requirements.txt'
+        " > "$HEXSTRIKE_INSTALL_LOG" 2>&1 &
+
         echo $! > "$ROOT/.hexstrike-install.pid"
-
-        nohup "$HEXSTRIKE_VENV/bin/pip" install -r "$HEXSTRIKE_API_REPO/requirements.txt" \
-            >> "$HEXSTRIKE_INSTALL_LOG" 2>&1 &
-
         echo "[OK] Background install started (PID $!)."
         echo "    Monitor with: tail -f $HEXSTRIKE_INSTALL_LOG"
     else
@@ -205,7 +205,7 @@ if [ "$PY311_READY" -eq 1 ]; then
     FILTERED_REQS="$(mktemp)"
     grep -v -E '^\s*gpt4all' "$REQS" > "$FILTERED_REQS"
 
-    "$PENTESTGPT_REPO/venv/bin/pip" install --upgrade pip
+    "$PENTESTGPT_REPO/venv/bin/pip" install --upgrade pip setuptools wheel
     "$PENTESTGPT_REPO/venv/bin/pip" install -r "$FILTERED_REQS"
 
     rm -f "$FILTERED_REQS"
