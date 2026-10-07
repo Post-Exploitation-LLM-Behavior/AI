@@ -1,3 +1,7 @@
+set -a
+source .env
+set +a
+
 curl -s "$GENAI_BASE_URL/chat/completions" \
   -H "Authorization: Bearer $GENAI_API_KEY" \
   -H "Content-Type: application/json" \
