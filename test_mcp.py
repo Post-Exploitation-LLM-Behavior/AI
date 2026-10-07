@@ -72,7 +72,7 @@ async def main():
             print("[+] Calling nmap_scan on 127.0.0.1...")
             result = await session.call_tool(
                 "nmap_scan",
-                {"targets": ["127.0.0.1"]},
+                {"targets": "127.0.0.1"},
             )
 
             # Print the tool's output
