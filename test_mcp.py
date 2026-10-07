@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # test_mcp.py — Direct MCP server test (no LLM involved)
 """
-Connects to the PentestGPT MCP server, lists its tools,
-and calls nmap_scan against localhost to verify the tool works.
+Connects to the PentestGPT MCP server, lists its tools and their schemas,
+then calls nmap_scan against localhost to verify the tool works.
 """
 
 import asyncio
@@ -49,21 +49,30 @@ async def main():
             await session.initialize()
             print("[OK] Session initialized.")
 
-            # List available tools
+            # List available tools and print each one's schema
             tools_response = await session.list_tools()
             tool_names = [t.name for t in tools_response.tools]
             print(f"[OK] Available tools: {tool_names}")
+
+            print()
+            print("=== Tool schemas ===")
+            for t in tools_response.tools:
+                print(f"\n{t.name}")
+                print(f"  description: {t.description}")
+                print(f"  input schema: {t.inputSchema}")
+            print("=== end of schemas ===")
 
             if "nmap_scan" not in tool_names:
                 print("[FAIL] nmap_scan not found in the tool list.")
                 sys.exit(1)
 
-            # Call nmap_scan against localhost (harmless)
+            # Call nmap_scan against localhost (harmless).
+            # Argument name is `targets` (plural), and it must be a list.
             print()
             print("[+] Calling nmap_scan on 127.0.0.1...")
             result = await session.call_tool(
                 "nmap_scan",
-                {"target": "127.0.0.1"},
+                {"targets": ["127.0.0.1"]},
             )
 
             # Print the tool's output
