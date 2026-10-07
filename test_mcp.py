@@ -1,11 +1,8 @@
 #!/usr/bin/env python3
-# test_tool_pickup.py
+# test_mcp.py — Direct MCP server test (no LLM involved)
 """
-Verifies that the GenAI gateway accepts a `tools` parameter and that the
-configured model actually selects a tool in response to a matching prompt.
-
-Run from anywhere:
-    python3 test_tool_pickup.py
+Connects to the PentestGPT MCP server, lists its tools,
+and calls nmap_scan against localhost to verify the tool works.
 """
 
 import asyncio
@@ -13,102 +10,74 @@ import os
 import sys
 from pathlib import Path
 
-from dotenv import load_dotenv
-from openai import AsyncOpenAI
+from mcp import ClientSession, StdioServerParameters
+from mcp.client.stdio import stdio_client
 
 
 # ------------------------------------------------------------------
-# Load .env from the same directory as this script (works regardless
-# of the current working directory).
+# Locate the PentestGPT MCP server script.
+# Adjust this path if your repo layout is different.
 # ------------------------------------------------------------------
-ENV_PATH = Path(__file__).resolve().parent / ".env"
-
-print(f"[debug] Script directory: {Path(__file__).resolve().parent}")
-print(f"[debug] Looking for .env at: {ENV_PATH}")
-print(f"[debug] .env exists: {ENV_PATH.is_file()}")
-
-if ENV_PATH.is_file():
-    load_dotenv(dotenv_path=ENV_PATH)
-else:
-    # Fall back to default search (CWD and upward)
-    print("[debug] .env not next to script; falling back to default load_dotenv()")
-    load_dotenv()
-
-base_url = os.getenv("GENAI_BASE_URL")
-api_key = os.getenv("GENAI_API_KEY")
-
-print(f"[debug] GENAI_BASE_URL = {base_url!r}")
-print(f"[debug] GENAI_API_KEY is set: {bool(api_key)}")
-
-if not base_url or not api_key:
-    print()
-    print("[FAIL] Missing GENAI_BASE_URL or GENAI_API_KEY.")
-    print("       Check that .env exists next to this script and contains:")
-    print("         GENAI_BASE_URL=https://...")
-    print("         GENAI_API_KEY=sk-...")
-    sys.exit(1)
+PENTESTGPT_SERVER = Path.home() / "Desktop" / "AI" / "PentestGPT-MCP" / "mcp_servers" / "pentest_tools_server.py"
+PENTESTGPT_VENV_PYTHON = Path.home() / "Desktop" / "AI" / "PentestGPT-MCP" / "venv" / "bin" / "python3"
 
 
-# ------------------------------------------------------------------
-# Main test
-# ------------------------------------------------------------------
 async def main():
-    client = AsyncOpenAI(base_url=base_url, api_key=api_key)
+    print(f"[debug] Server script:  {PENTESTGPT_SERVER}")
+    print(f"[debug] Server exists:  {PENTESTGPT_SERVER.is_file()}")
+    print(f"[debug] Venv python:    {PENTESTGPT_VENV_PYTHON}")
+    print(f"[debug] Venv exists:    {PENTESTGPT_VENV_PYTHON.is_file()}")
 
-    # A single dummy tool the model should recognize and call.
-    tools = [{
-        "type": "function",
-        "function": {
-            "name": "get_weather",
-            "description": "Get the current weather for a city",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "city": {
-                        "type": "string",
-                        "description": "The name of the city"
-                    }
-                },
-                "required": ["city"]
-            }
-        }
-    }]
+    if not PENTESTGPT_SERVER.is_file():
+        print("[FAIL] PentestGPT server script not found.")
+        sys.exit(1)
 
-    print()
-    print("[+] Sending tool-enabled request to the gateway...")
+    # Use the venv python if it exists; otherwise fall back to system python3
+    server_command = str(PENTESTGPT_VENV_PYTHON) if PENTESTGPT_VENV_PYTHON.is_file() else "python3"
 
-    response = await client.chat.completions.create(
-        model="llama3.1:70b",
-        messages=[
-            {"role": "user", "content": "What's the weather in Boston?"}
-        ],
-        tools=tools,
-        tool_choice="auto",
+    server_params = StdioServerParameters(
+        command=server_command,
+        args=[str(PENTESTGPT_SERVER)],
+        env={**os.environ},
     )
 
-    msg = response.choices[0].message
-
     print()
-    print("=== Response ===")
-    print(f"Content:    {msg.content!r}")
-    print(f"Tool calls: {msg.tool_calls}")
+    print("[+] Spawning PentestGPT MCP server...")
 
-    if msg.tool_calls:
-        print()
-        print("[OK] Gateway recognized the tool and the model selected it.")
-        for tc in msg.tool_calls:
-            print(f"  Tool:      {tc.function.name}")
-            print(f"  Arguments: {tc.function.arguments}")
-        return 0
-    else:
-        print()
-        print("[FAIL] Model returned text without selecting a tool.")
-        print("       Possible causes:")
-        print("       - The gateway strips the `tools` parameter.")
-        print("       - The model name doesn't support function calling on this gateway.")
-        print("       - The prompt didn't strongly trigger the tool.")
-        return 1
+    async with stdio_client(server_params) as (read, write):
+        async with ClientSession(read, write) as session:
+            await session.initialize()
+            print("[OK] Session initialized.")
+
+            # List available tools
+            tools_response = await session.list_tools()
+            tool_names = [t.name for t in tools_response.tools]
+            print(f"[OK] Available tools: {tool_names}")
+
+            if "nmap_scan" not in tool_names:
+                print("[FAIL] nmap_scan not found in the tool list.")
+                sys.exit(1)
+
+            # Call nmap_scan against localhost (harmless)
+            print()
+            print("[+] Calling nmap_scan on 127.0.0.1...")
+            result = await session.call_tool(
+                "nmap_scan",
+                {"target": "127.0.0.1"},
+            )
+
+            # Print the tool's output
+            output_text = "".join(
+                c.text for c in result.content if hasattr(c, "text")
+            )
+
+            print()
+            print("=== nmap_scan result ===")
+            print(output_text[:2000])  # truncate for readability
+            print("=== end of result ===")
+            print()
+            print("[OK] nmap_scan call succeeded.")
 
 
 if __name__ == "__main__":
-    sys.exit(asyncio.run(main()))
+    asyncio.run(main())
