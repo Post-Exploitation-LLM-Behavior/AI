@@ -59,7 +59,7 @@ async def main():
             for t in tools_response.tools:
                 print(f"\n{t.name}")
                 print(f"  description: {t.description}")
-                print(f"  input schema: {t.inputSchema}")
+                print(f"  input schema: {t.input_schema}")
             print("=== end of schemas ===")
 
             if "nmap_scan" not in tool_names:
