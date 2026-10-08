@@ -73,14 +73,30 @@ if [ ! -d "$HEXSTRIKE_VENV" ]; then
     python3.11 -m venv "$HEXSTRIKE_VENV"
 fi
 
-echo "[+] Installing Flask API deps (upgrading pip first)..."
+echo "[+] Upgrading pip/setuptools/wheel in Flask API venv..."
 "$HEXSTRIKE_VENV/bin/pip" install --upgrade pip setuptools wheel
 
+# ---- Filter out angr and pwntools ----
 if [ -f "$HEXSTRIKE_API_REPO/requirements.txt" ]; then
-    echo "[+] Installing requirements.txt (this may take a while)..."
-    "$HEXSTRIKE_VENV/bin/pip" install -r "$HEXSTRIKE_API_REPO/requirements.txt"
+    echo "[+] Filtering requirements.txt (removing angr, pwntools)..."
+    REQS="$HEXSTRIKE_API_REPO/requirements.txt"
+    FILTERED_REQS="$(mktemp)"
+    grep -v -E '^\s*(angr|pwntools)' "$REQS" > "$FILTERED_REQS"
+
+    echo "[+] Installing filtered requirements (this may take several minutes)..."
+    "$HEXSTRIKE_VENV/bin/pip" install -r "$FILTERED_REQS"
+
+    rm -f "$FILTERED_REQS"
 else
     echo "[!] No requirements.txt found. Skipping."
+fi
+
+# ---- Verify core imports ----
+if "$HEXSTRIKE_VENV/bin/python" -c "import flask, requests" 2>/dev/null; then
+    echo "[OK] Flask API core deps importable."
+else
+    echo "[!] WARNING: flask or requests failed to import."
+    echo "    Check the install output above for errors."
 fi
 
 echo ""
