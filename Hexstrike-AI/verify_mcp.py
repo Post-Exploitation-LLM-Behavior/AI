@@ -74,14 +74,6 @@ def verify():
     servers = config.get("mcpServers", {})
     ok(f"Configured MCP servers: {', '.join(servers.keys())}")
 
-    # ---- Metasploit ----
-    if "mcp-pymetasploit3" in servers:
-        print("[ Metasploit MCP ]")
-        results.append(("msfconsole", check_command("msfconsole")))
-        results.append(("mcp-pymetasploit3", check_command("mcp-pymetasploit3")))
-        results.append(("msfrpcd port 55553", check_port("127.0.0.1", 55553, "msfrpcd RPC")))
-        print()
-
     # ---- HexStrike ----
     if "hexstrike" in servers:
         print("[ HexStrike MCP ]")
@@ -102,43 +94,6 @@ def verify():
 
         # Check HexStrike Flask API (port 8888 by convention)
         results.append(("HexStrike Flask API :8888", check_port("127.0.0.1", 8888, "hexstrike Flask API")))
-        print()
-
-    # ---- PentestGPT (yuhano) ----
-    if "pentestgpt" in servers:
-        print("[ PentestGPT MCP ]")
-        cfg = servers["pentestgpt"]
-
-        # Check the script path from config
-        args = cfg.get("args", [])
-        script_path = None
-        for a in args:
-            if isinstance(a, str) and a.endswith(".py"):
-                script_path = a
-                break
-
-        if script_path:
-            results.append(("pentest_tools_server.py", check_file(script_path)))
-
-            # Check the venv python that should live next to the repo
-            # Repo layout: <repo>/mcp_servers/pentest_tools_server.py
-            # Venv layout: <repo>/venv/bin/python3
-            repo_dir = Path(script_path).parent.parent
-            venv_python = repo_dir / "venv" / "bin" / "python3"
-            if venv_python.is_file():
-                ok(f"Venv python found: {venv_python}")
-                results.append(("PentestGPT venv", True))
-            else:
-                warn(f"Venv python NOT found at: {venv_python}")
-                warn("setup.sh should have created it. Re-run setup.sh.")
-                results.append(("PentestGPT venv", False))
-        else:
-            fail("No .py script found in pentestgpt args")
-            results.append(("PentestGPT script path", False))
-
-        # Host-level tools the PentestGPT server invokes
-        results.append(("nmap", check_command("nmap")))
-        results.append(("dirb", check_command("dirb")))
         print()
 
     # ---- Gateway ----

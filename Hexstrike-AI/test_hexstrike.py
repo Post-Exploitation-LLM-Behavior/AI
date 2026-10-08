@@ -19,7 +19,7 @@ from mcp.client.stdio import stdio_client
 # ------------------------------------------------------------------
 # Paths. Adjust if your layout differs.
 # ------------------------------------------------------------------
-HEXSTRIKE_MCP_SERVER = Path.home() / "Desktop" / "AI" / "hexstrike_mcp_server.py"
+HEXSTRIKE_MCP_SERVER = Path.home() / "Desktop" / "AI" / "Hexstrike-AI" /"hexstrike_mcp_server.py"
 HEXSTRIKE_API_URL = "http://localhost:8888"
 
 
