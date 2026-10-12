@@ -4,19 +4,56 @@ import os
 import time
 from contextlib import AsyncExitStack
 from dotenv import load_dotenv
+
+# v4 imports
 from langfuse.openai import AsyncOpenAI
+from langfuse import get_client, observe
 
 from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
 
-from prompts import AUTONOMOUS_PROMPT
+from prompts import TEST_PROMPT
 
 load_dotenv()
 
 genai_client = AsyncOpenAI(
     base_url=os.getenv("GENAI_BASE_URL"),
     api_key=os.getenv("GENAI_API_KEY"),
+    timeout=300.0,
+    max_retries=0,
 )
+
+# Get the global Langfuse client instance
+langfuse = get_client()
+
+
+@observe(as_type="tool", name="MCP Tool Call")
+async def call_mcp_tool(target_session, tool_name: str, args: dict) -> str:
+    """
+    Execute an MCP tool and record the call as a 'tool' observation in Langfuse.
+    Uses the v4 API: update_current_span() instead of langfuse_context.
+    """
+    # Record the arguments and tool name on the observation
+    langfuse.update_current_span(
+        name=tool_name,
+        input={"tool": tool_name, "args": args},
+    )
+
+    try:
+        result = await target_session.call_tool(tool_name, args)
+        output_text = "".join(
+            c.text for c in result.content if hasattr(c, "text")
+        )
+        langfuse.update_current_span(output=output_text)
+        return output_text
+    except Exception as e:
+        error_text = f"ERROR executing tool: {e}"
+        langfuse.update_current_span(
+            output=error_text,
+            level="ERROR",
+        )
+        raise
+
 
 async def run_autonomous_agent(
     user_input: str,
@@ -35,7 +72,6 @@ async def run_autonomous_agent(
     log_files = []
 
     async with AsyncExitStack() as stack:
-        # Connect to each configured MCP server
         for server_name, server_cfg in config.get("mcpServers", {}).items():
             print(f"[+] Spawning MCP server: {server_name}")
 
@@ -45,7 +81,6 @@ async def run_autonomous_agent(
                 env={**os.environ, **server_cfg.get("env", {})},
             )
 
-            # Redirect this server's stderr to a log file
             log_path = f"{server_name}_stderr.log"
             server_log = open(log_path, "a")
             log_files.append(server_log)
@@ -59,7 +94,6 @@ async def run_autonomous_agent(
 
             sessions[server_name] = session
 
-            # Aggregate tools from this server
             mcp_tools = await session.list_tools()
             for tool in mcp_tools.tools:
                 all_tools.append({
@@ -67,26 +101,29 @@ async def run_autonomous_agent(
                     "function": {
                         "name": f"{server_name}__{tool.name}",
                         "description": tool.description,
-                        "parameters": tool.inputSchema,
+                        "parameters": tool.input_schema,
                     },
                 })
 
         print(f"[+] Total aggregated tools: {len(all_tools)}")
 
         messages = [
-            {"role": "system", "content": AUTONOMOUS_PROMPT},
+            {"role": "system", "content": TEST_PROMPT},
             {"role": "user", "content": user_input},
         ]
 
         start_time = time.monotonic()
         deadline = start_time + (max_runtime_hours * 3600)
+        session_id = f"run-{int(start_time)}"
 
         while True:
-            # 3-hour deadline check
             if time.monotonic() > deadline:
                 elapsed_min = (time.monotonic() - start_time) / 60
-                print(f"[!] Max runtime ({max_runtime_hours}h) exceeded after {elapsed_min:.1f} min.")
-                return "Agent stopped: maximum runtime reached."
+                print(
+                    f"[!] Max runtime ({max_runtime_hours}h) exceeded "
+                    f"after {elapsed_min:.1f} min."
+                )
+                break
 
             response = await genai_client.chat.completions.create(
                 model=model_name,
@@ -94,8 +131,9 @@ async def run_autonomous_agent(
                 tools=all_tools if all_tools else None,
                 tool_choice="auto",
                 parallel_tool_calls=False,
+                # v4: session_id and tags go in the metadata parameter of the OpenAI call
                 metadata={
-                    "langfuse_session_id": f"run-{start_time}",
+                    "langfuse_session_id": session_id,
                     "langfuse_tags": ["mcp-agent", model_name],
                 },
             )
@@ -103,17 +141,14 @@ async def run_autonomous_agent(
             msg = response.choices[0].message
             messages.append(msg)
 
-            # No tool calls -> model produced text
             if not msg.tool_calls:
                 content = (msg.content or "").strip()
 
-                # Early exit if model signals completion
                 if "DONE" in content.upper():
                     elapsed_min = (time.monotonic() - start_time) / 60
                     print(f"[+] Agent signaled DONE after {elapsed_min:.1f} min.")
-                    return content
+                    break
 
-                # Otherwise nudge it to continue
                 messages.append({
                     "role": "user",
                     "content": (
@@ -123,7 +158,6 @@ async def run_autonomous_agent(
                 })
                 continue
 
-            # Process each requested tool call
             for tool_call in msg.tool_calls:
                 full_tool_name = tool_call.function.name
                 server_prefix, original_tool_name = full_tool_name.split("__", 1)
@@ -133,17 +167,22 @@ async def run_autonomous_agent(
                 except json.JSONDecodeError as e:
                     output_text = f"ERROR: invalid JSON arguments: {e}"
                     print(f"[!] {output_text}")
-                else:
-                    print(f"-> [{server_prefix}] {original_tool_name}")
-                    target_session = sessions[server_prefix]
-                    try:
-                        result = await target_session.call_tool(original_tool_name, args)
-                        output_text = "".join(
-                            c.text for c in result.content if hasattr(c, "text")
-                        )
-                    except Exception as e:
-                        output_text = f"ERROR executing tool: {e}"
-                        print(f"[!] {output_text}")
+                    messages.append({
+                        "role": "tool",
+                        "tool_call_id": tool_call.id,
+                        "content": output_text,
+                    })
+                    continue
+
+                print(f"-> [{server_prefix}] {original_tool_name}")
+                target_session = sessions[server_prefix]
+
+                try:
+                    output_text = await call_mcp_tool(
+                        target_session, original_tool_name, args
+                    )
+                except Exception as e:
+                    output_text = f"ERROR executing tool: {e}"
 
                 messages.append({
                     "role": "tool",
@@ -151,19 +190,36 @@ async def run_autonomous_agent(
                     "content": output_text,
                 })
 
-    # AsyncExitStack closes here; close log files
     for lf in log_files:
         try:
             lf.close()
         except Exception:
             pass
 
+    # Flush remaining Langfuse traces
+    try:
+        langfuse.flush()
+    except Exception as e:
+        print(f"[!] Langfuse flush failed: {e}")
+
 
 if __name__ == "__main__":
-    # Options: "llama3.1:70b", "qwen3:latest", "devstral:latest", "gpt-oss:120b"
     MODEL = "llama3.1:70b"
-    INPUT = "Initialize system status check using connected MCP tools."
+
+    INPUT = (
+        "Perform exactly one action and then stop.\n\n"
+        "Action: call the tool named 'pentestMCP__run_dig_tool' with the arguments "
+        "{\"domain\": \"localhost\", \"options\": \"+short\"}.\n\n"
+        "Do not call any other tool. Do not retry. Do not modify the arguments. "
+        "After you receive the tool's result, write a one-sentence summary of what "
+        "the result contained, then reply with the single word DONE."
+    )
 
     print(f"=== Starting MCP Session using {MODEL} ===")
-    summary = asyncio.run(run_autonomous_agent(INPUT, model_name=MODEL))
-    print("\n--- Output ---\n", summary)
+    asyncio.run(
+        run_autonomous_agent(
+            INPUT,
+            model_name=MODEL,
+            max_runtime_hours=0.1,
+        )
+    )
