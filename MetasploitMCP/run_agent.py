@@ -4,7 +4,7 @@ import os
 import time
 from contextlib import AsyncExitStack
 from dotenv import load_dotenv
-from openai import AsyncOpenAI
+from langfuse.openai import AsyncOpenAI
 
 from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
@@ -94,6 +94,10 @@ async def run_autonomous_agent(
                 tools=all_tools if all_tools else None,
                 tool_choice="auto",
                 parallel_tool_calls=False,
+                metadata={
+                    "langfuse_session_id": f"run-{start_time}",
+                    "langfuse_tags": ["mcp-agent", model_name],
+                },
             )
 
             msg = response.choices[0].message

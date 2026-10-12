@@ -42,3 +42,5 @@ python3 run_agent.py
 This is where the main logic for the LLM call is, with a 3 hour timeout.
 Log files will exist in the root directory with the name: 
 - mcp-pymetasploit3_stderr.log
+
+Look at traces with: http://localhost:3000
