@@ -22,3 +22,23 @@ Run implant.exe on the Windows machine with
 
     Unblock-File C:\Users\Public\implant.exe
 
+---------------
+
+mcp server:
+
+# 2. Clone the repository there
+git clone https://github.com/schwarztim/sec-sliver-c2-mcp.git
+
+# 3. Enter the directory
+cd sec-sliver-c2-mcp
+
+# 1. Download the setup script for Node 20
+curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+
+# 2. Install Node.js
+sudo apt-get install -y nodejs
+node -v
+
+# 4. Install dependencies and build the compiled Javascript
+npm install
+npm run build

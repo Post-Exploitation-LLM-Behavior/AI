@@ -3,7 +3,7 @@
     "sliver-c2": {
       "command": "node",
       "args": [
-        "/home/student/sec-sliver-c2-mcp/dist/index.js",
+        "/home/student/sec-sliver-c2-mcp-main/dist/index.js",
         "--operator-config",
         "/home/student/sliver-operator.cfg", 
         "--python",
