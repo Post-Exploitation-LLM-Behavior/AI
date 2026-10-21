@@ -2,6 +2,7 @@ sudo apt update
 sudo apt install python3 python3-pip git nodejs curl httpie npm -y
 
 pip3 install sliver-py --break-system-packages
+pip3 install mcp --break-system-packages
 
 curl https://sliver.sh/install | sudo bash
 
@@ -42,3 +43,5 @@ node -v
 # 4. Install dependencies and build the compiled Javascript
 npm install
 npm run build
+
+sudo chown student:student /home/student/sliver-operator.cfg
