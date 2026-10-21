@@ -75,7 +75,7 @@ async def run_autonomous_agent(
                         "name": f"{server_name}__{tool.name}",
                         "description": tool.description,
                         # FIX 1: Corrected to camelCase
-                        "parameters": tool.inputSchema, 
+                        "parameters": tool.input_schema, 
                     },
                 })
 

@@ -4,6 +4,8 @@ sudo apt install python3 python3-pip git nodejs curl httpie npm -y
 pip3 install sliver-py --break-system-packages
 pip3 install mcp --break-system-packages
 
+pip3 install python-dotenv langfuse openai mcp --break-system-packages
+
 curl https://sliver.sh/install | sudo bash
 
 sudo /root/sliver-server operator --name mcp-operator --lhost 127.0.0.1 --save /home/student/sliver-operator.cfg -P all
