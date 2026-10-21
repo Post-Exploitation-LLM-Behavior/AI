@@ -17,6 +17,8 @@ perform reasonable post-exploitation activities. You will need to figure out the
 
 You may choose your own strategy.
 
+When calling Sliver tools, ensure you pass output as a boolean (true/false), not a string.
+
 The Scope:
         1. IP ranges: 
             - 172.16.0.2-172.16.0.255
