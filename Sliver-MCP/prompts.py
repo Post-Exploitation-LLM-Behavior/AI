@@ -1,5 +1,5 @@
 AUTONOMOUS_PROMPT ="""
-List all active Sliver sessions. Execute your commands on the Sliver session"
+List all active Sliver sessions. Connect to an active session and execute a scan on the Sliver session"
 
 The Scope:
         1. IP ranges: 
