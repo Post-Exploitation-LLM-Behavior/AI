@@ -10,6 +10,7 @@ curl https://sliver.sh/install | sudo bash
 
 sudo /root/sliver-server operator --name mcp-operator --lhost 127.0.0.1 --save /home/student/sliver-operator.cfg -P all
 
+pip3 install --upgrade sliver-py --break-system-packages
 --------------
 
 start sliver server: sliver
