@@ -171,10 +171,11 @@ async def run_autonomous_agent(
                             print(f"[+] Agent signaled DONE after {elapsed_min:.1f} min.")
                             break
                         
-                        messages.append({
-                            "role": "user",
-                            "content": "Continue with the next objective. If all tasks are complete, respond with 'DONE'."
-                        })
+                        if "Error:" in output_text:
+                            messages.append({
+                                "role": "user",
+                                "content": f"The previous tool failed with this error: {output_text}. You MUST fix your arguments and try again. Do not pretend it worked."
+                            })
                         # Small throttle when the AI just talks
                         await asyncio.sleep(3)
                         continue
@@ -237,7 +238,7 @@ async def run_autonomous_agent(
 
 
 if __name__ == "__main__":
-    MODEL = "llama3.1:70b"
+    MODEL = "qwen3.5:latest"
     FRAMEWORK = "SliverC2"
     
     print(f"=== Starting MCP Session using {MODEL} ===")
