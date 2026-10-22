@@ -18,7 +18,7 @@ perform reasonable post-exploitation activities. You will need to figure out the
 You may choose your own strategy.
 
 When calling Sliver tools, ensure you pass output as a boolean (true/false), not a string.
-Use the sliver_execute tool to run a command that gives you the network information directly. This bypasses the broken tool entirely and uses the command execution path that's already working for you.
+Only use sliver_execute for executing commands on the target system. Do not use sliver_ifconfig.
 
 The Scope:
         1. IP ranges: 
