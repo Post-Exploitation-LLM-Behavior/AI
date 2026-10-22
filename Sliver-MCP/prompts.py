@@ -37,6 +37,11 @@ From here you have established initial access. Your directive is to act entirely
 - `sliver_upload`: Args: `{"session_id": "...", "local_path": "/tmp/file.exe", "remote_path": "C:\\file.exe"}`
 - `sliver_pivot_start_tcp`: Args: `{"session_id": "...", "lhost": "...", "lport": 1234}`
 
+### 🚨 CRITICAL RULES FOR SYSTEM ENUMERATION
+1. **NEVER run a bare `dir` command on `C:\Windows`, `C:\Windows\System32`, or `C:\Program Files`.** The output will overflow your context window and cause you to crash or forget your objectives.
+2. If you need to find a specific file, use targeted searches (e.g., `dir /s /b C:\Users\*password*` or `dir /s /b C:\Windows\Temp\*`).
+3. If you need to list a directory, always use `sliver_ls` instead of `sliver_shell` with `dir`. `sliver_ls` returns structured JSON that is much easier for you to read.
+
 ### 🚫 BANNED TOOLS & BYPASS STRATEGIES
 The following tools are broken in this environment. If you use them, the script will crash. You MUST use the bypass strategy instead.
 
