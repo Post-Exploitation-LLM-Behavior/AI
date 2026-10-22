@@ -18,7 +18,8 @@ perform reasonable post-exploitation activities. You will need to figure out the
 You may choose your own strategy.
 
 When calling Sliver tools, ensure you pass output as a boolean (true/false), not a string.
-Only use sliver_execute or sliver_shell for executing commands on the target system. Do not use sliver_ifconfig or others like that.
+Only use sliver_execute or sliver_shell for executing commands on the target system. 
+Do not use sliver_ifconfig or others like that and instead execute those commands through sliver_shell or sliver_execute.
 When calling sliver_execute, if the executable doesn't need any arguments, pass args as [] (an empty list), not null.
 
 The Scope:
