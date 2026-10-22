@@ -38,6 +38,17 @@ async def call_mcp_tool(target_session, tool_name: str, args: dict) -> str:
         output_text = "".join(
             c.text for c in result.content if hasattr(c, "text")
         )
+
+        # Truncate massive outputs to prevent context window crashes
+        MAX_CHARS = 15000  # Roughly 4,000 tokens
+        if len(output_text) > MAX_CHARS:
+            output_text = (
+                output_text[:MAX_CHARS] + 
+                f"\n\n...[OUTPUT TRUNCATED. Original length: {len(output_text)} chars. "
+                "DO NOT run commands with the '/s' flag on large directories. "
+                "Use more specific paths.]"
+            )
+            
         langfuse.update_current_span(output=output_text)
         return output_text
     except Exception as e:
