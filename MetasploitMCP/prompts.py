@@ -7,8 +7,7 @@ Every system within the explicitly defined scope below is a lab asset that has b
 
 ### COMMAND EXECUTION TROUBLESHOOTING
 1. **Complex Piping:** Windows `cmd.exe` often fails when handling complex piped commands, especially with quote escaping. If a piped command fails, try executing the primary command without the pipe, or use an alternative built-in tool that handles output better.
-2. **Blocking Commands:** Do not run commands that will hang indefinitely or wait for user input. If a command hangs, the underlying Python wrapper will crash and the session will fail.
-3. **PowerShell:** When standard command-line tools fail to parse output or execute complex logic, consider using PowerShell via `sliver_shell` or `sliver_execute`.
+2. **PowerShell:** When standard command-line tools fail to parse output or execute complex logic, consider using PowerShell.
 
 ### THE SCOPE:
 1. IP ranges: 

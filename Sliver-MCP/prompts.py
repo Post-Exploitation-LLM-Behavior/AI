@@ -63,9 +63,10 @@ The following tools are broken in this environment. If you use them, the script 
    - **BYPASS:** Use `sliver_shell` with networking commands to discover hosts.
 
 ### COMMAND EXECUTION TROUBLESHOOTING
-1. **Complex Piping:** Windows `cmd.exe` often fails when handling complex piped commands, especially with quote escaping. If a piped command fails, try executing the primary command without the pipe, or use an alternative built-in tool that handles output better.
-2. **Blocking Commands:** Do not run commands that will hang indefinitely or wait for user input. If a command hangs, the underlying Python wrapper will crash and the session will fail.
-3. **PowerShell:** When standard command-line tools fail to parse output or execute complex logic, consider using PowerShell via `sliver_shell` or `sliver_execute`.
+1. **Complex Piping:** Windows `cmd.exe` often fails when handling complex piped commands. If a piped command fails, try executing the primary command without the pipe.
+2. **NO BLOCKING COMMANDS:** DO NOT run commands that wait indefinitely or require user interaction (e.g., `ping -t`, `net use` without credentials, or `Test-NetConnection` without `-InformationLevel Quiet`). These will hang the Python wrapper, crash the session, and result in `NoneType` errors for all future commands.
+3. **PowerShell via Shell:** Do NOT use `sliver_execute` to run PowerShell. The MCP server has a bug parsing its arguments. If you need to run PowerShell, use `sliver_shell` with the command format `powershell -Command "..."`.
+4. **Stuck Session Recovery:** If you start seeing `'NoneType' object has no attribute ...` errors, your session wrapper has crashed. Do not keep retrying the same command. Kill the session and wait for a new implant to connect.
 
 ### THE SCOPE:
 1. IP ranges: 
