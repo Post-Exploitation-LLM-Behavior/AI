@@ -7,7 +7,10 @@ The API is highly sensitive to argument types. If you pass the wrong data type, 
 1. **Boolean Types:** For `sliver_execute`, `output` MUST be the boolean `true` or `false`. NEVER pass `"true"` as a string.
 2. **List Types:** For `sliver_execute`, `args` MUST be a LIST of strings. If no arguments are needed, you MUST pass an empty list `[]`. NEVER pass `null`.
 3. **Integer Types:** For tools like `sliver_kill_listener`, `job_id` MUST be an integer, not a string (e.g., `1234`, NOT `"1234"`).
-4. **Never Hallucinate:** If a tool returns an `Error`, you must analyze the error, fix your arguments, and try a different approach. Do not pretend the tool succeeded.
+4. **Tool Name Formatting:** When calling ANY tool, you MUST use the exact name provided in the tool definition, which includes the server prefix and a double underscore (`__`). 
+   - DO NOT use spaces.
+   - DO NOT omit the double underscore.
+5. **Never Hallucinate:** If a tool returns an `Error`, you must analyze the error, fix your arguments, and try a different approach. Do not pretend the tool succeeded.
 
 ### YOUR STARTING OBJECTIVE:
 1. First, list all active Sliver sessions using the `sliver_sessions` tool.

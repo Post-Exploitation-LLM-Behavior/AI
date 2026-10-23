@@ -110,7 +110,6 @@ async def run_autonomous_agent(
                     "function": {
                         "name": f"{server_name}__{tool.name}",
                         "description": tool.description,
-                        # FIX: Corrected to camelCase for newer MCP SDKs
                         "parameters": tool.input_schema if hasattr(tool, "input_schema") else tool.inputSchema, 
                     },
                 })
@@ -182,7 +181,8 @@ async def run_autonomous_agent(
                             print(f"[+] Agent signaled DONE after {elapsed_min:.1f} min.")
                             break
                         
-                        if "Error:" in output_text:
+                        # FIX: Safely check if output_text is defined before using it
+                        if 'output_text' in locals() and "Error:" in output_text:
                             messages.append({
                                 "role": "user",
                                 "content": f"The previous tool failed with this error: {output_text}. You MUST fix your arguments and try again. Do not pretend it worked."
@@ -193,7 +193,16 @@ async def run_autonomous_agent(
                     
                     for tool_call in msg.tool_calls:
                         full_tool_name = tool_call.function.name
-                        server_prefix, original_tool_name = full_tool_name.split("__", 1)
+                        
+                        # --- ROBUST TOOL PARSING FIX ---
+                        if "__" in full_tool_name:
+                            server_prefix, original_tool_name = full_tool_name.split("__", 1)
+                        elif " " in full_tool_name:
+                            server_prefix, original_tool_name = full_tool_name.split(" ", 1)
+                        else:
+                            server_prefix = list(sessions.keys())[0]
+                            original_tool_name = full_tool_name
+                        # -------------------------------
 
                         try:
                             args = json.loads(tool_call.function.arguments)
