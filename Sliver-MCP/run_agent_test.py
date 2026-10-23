@@ -206,6 +206,11 @@ async def run_autonomous_agent(
 
                         try:
                             args = json.loads(tool_call.function.arguments)
+                            if "output" in args:
+                                if str(args["output"]).lower() == "true":
+                                    args["output"] = True
+                                elif str(args["output"]).lower() == "false":
+                                    args["output"] = False
                         except json.JSONDecodeError as e:
                             output_text = f"ERROR: invalid JSON arguments: {e}"
                             print(f"[!] {output_text}")

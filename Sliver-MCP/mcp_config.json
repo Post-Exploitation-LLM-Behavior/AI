@@ -1,13 +1,12 @@
 {
   "mcpServers": {
     "sliver-c2": {
-      "command": "node",
+      "command": "python3",
       "args": [
-        "/home/student/Downloads/sec-sliver-c2-mcp-main/dist/index.js",
+        "-m",
+        "sliver_mcp",
         "--operator-config",
-        "/home/student/sliver-operator.cfg", 
-        "--python",
-        "python3"
+        "/home/student/sliver-operator.cfg"
       ]
     }
   }
