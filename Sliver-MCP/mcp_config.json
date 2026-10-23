@@ -5,7 +5,7 @@
       "args": [
         "-m",
         "sliver_mcp",
-        "--operator-config",
+        "--config",
         "/home/student/sliver-operator.cfg"
       ]
     }
