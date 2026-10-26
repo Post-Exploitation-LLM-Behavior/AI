@@ -274,6 +274,6 @@ if __name__ == "__main__":
             session_id="sliver-test-01",
             trial_number="01",
             framework=FRAMEWORK,
-            max_runtime_hours=0.75,
+            max_runtime_hours=0.34,
         )
     )
