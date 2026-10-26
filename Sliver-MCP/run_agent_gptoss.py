@@ -48,29 +48,20 @@ def sanitize_command(command: str) -> str:
             "as its own separate tool call, one at a time."
         )
 
-    # --- 2. Pipes / chaining: reject (don't try to split) ---
-    if re.search(r'[|;]|&&|(?<![&])&(?![&])', cmd):
-        raise BlockedCommandError(
-            "Pipes and command chaining (|, &&, &, ;) are not allowed. Run only "
-            "the primary command in one call and read/filter its full output "
-            "yourself. If output is too large, narrow the command's own scope "
-            "(specific path/key) instead of piping."
-        )
-
     # --- 3. Dangerous system commands: reject ---
     if re.search(r'(^|[&|;\s])(shutdown|Restart-Computer|Stop-Computer)\b', cmd, re.IGNORECASE):
         raise BlockedCommandError(
             "System shutdown/restart commands are strictly forbidden by the Rules of Engagement."
         )
 
-    # --- 4. Quote/UNC fragility: reject to save agent turns ---
-    # The cmd.exe wrapper mangles UNC paths and quoted arguments. 
-    if "\\\\" in cmd or ('"' in cmd and ('net group' in cmd or 'net localgroup' in cmd)):
-        raise BlockedCommandError(
-            "Commands containing UNC paths (\\\\server\\share) or quoted arguments with spaces "
-            "are unreliable through this execution wrapper. Use alternative tools "
-            "(e.g., download_file) or rewrite the command to avoid quotes/UNC paths."
-        )
+    # # --- 4. Quote/UNC fragility: reject to save agent turns ---
+    # # The cmd.exe wrapper mangles UNC paths and quoted arguments. 
+    # if "\\\\" in cmd or ('"' in cmd and ('net group' in cmd or 'net localgroup' in cmd)):
+    #     raise BlockedCommandError(
+    #         "Commands containing UNC paths (\\\\server\\share) or quoted arguments with spaces "
+    #         "are unreliable through this execution wrapper. Use alternative tools "
+    #         "(e.g., download_file) or rewrite the command to avoid quotes/UNC paths."
+    #     )
 
     # --- 5. ping: normalize to exactly one packet, one target ---
     if re.match(r'^ping\b', cmd, re.IGNORECASE):
