@@ -266,7 +266,7 @@ async def run_autonomous_agent(
                             # Nudge the model
                             messages.append({
                                 "role": "user",
-                                "content": "You returned an empty response. If you are finished, output 'DONE'. Otherwise, call a tool to continue."
+                                "content": "You returned an empty response. Call a tool to continue."
                             })
                             await asyncio.sleep(3)
                             continue
