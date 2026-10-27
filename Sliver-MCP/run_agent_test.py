@@ -31,35 +31,35 @@ langfuse = get_client()
 # ---------------------------------------------------------------------------
 # Implant-timeout detection + session rebind helpers
 # ---------------------------------------------------------------------------
-IMPLANT_TIMEOUT_PATTERNS = (
-    "implant timeout",
-    "deadline_exceeded",
-    "deadline exceeded",
-    "statuscode.deadline_exceeded",
-    "execution failed:",
-    "aiorpcerror",
-)
+# Only the genuine Sliver implant-timeout signal. A generic tool failure
+# (bad args, missing file, unsupported command, etc.) must NOT match here,
+# otherwise the agent rebinds sessions on every unrelated error.
+IMPLANT_TIMEOUT_MARKER = "implant timeout"
 
 ALIVE_STATUS_TOKENS = ("alive", "active", "healthy", "connected")
 
 
 def _is_implant_timeout_error(text: str) -> bool:
-    """Detect Sliver AioRpcError DEADLINE_EXCEEDED / implant timeout."""
+    """Detect ONLY the Sliver implant timeout.
+
+    Matches the exact RPC detail Sliver emits when the implant stops
+    responding, e.g.:
+
+        Execution failed: <AioRpcError of RPC that terminated with:
+        status = StatusCode.DEADLINE_EXCEEDED
+        details = "implant timeout"
+        debug_error_string = "DEADLINE_EXCEEDED:implant timeout"
+
+    Deliberately does NOT match generic errors such as:
+        - "ERROR executing tool: ..."
+        - "ERROR: invalid JSON arguments: ..."
+        - StatusCode.UNAVAILABLE / INTERNAL / NOT_FOUND
+        - bare DEADLINE_EXCEEDED without the "implant timeout" detail
+          (other RPCs can also time out)
+    """
     if not text:
         return False
-    low = text.lower()
-
-    # Strong signal: the exact Sliver RPC phrasing.
-    if "statuscode.deadline_exceeded" in low or "implant timeout" in low:
-        return True
-
-    # Weaker heuristic: AioRpcError + timeout wording.
-    if "aiorpcerror" in low and (
-        "deadline" in low or "timeout" in low or "timed out" in low
-    ):
-        return True
-
-    return any(p in low for p in IMPLANT_TIMEOUT_PATTERNS)
+    return IMPLANT_TIMEOUT_MARKER in text.lower()
 
 
 def _parse_sessions(output_text: str):
