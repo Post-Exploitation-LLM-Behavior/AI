@@ -1,6 +1,7 @@
 import asyncio
 import json
 import os
+import re
 import time
 from contextlib import AsyncExitStack
 from dotenv import load_dotenv
@@ -20,13 +21,153 @@ genai_client = AsyncOpenAI(
     base_url=os.getenv("GENAI_BASE_URL"),
     api_key=os.getenv("GENAI_API_KEY"),
     timeout=300.0,
-    max_retries=0, # We handle retries manually below
+    max_retries=0,  # We handle retries manually below
 )
 
 # Get the global Langfuse client instance
 langfuse = get_client()
 
 
+# ---------------------------------------------------------------------------
+# Implant-timeout detection + session rebind helpers
+# ---------------------------------------------------------------------------
+IMPLANT_TIMEOUT_PATTERNS = (
+    "implant timeout",
+    "deadline_exceeded",
+    "deadline exceeded",
+    "statuscode.deadline_exceeded",
+    "execution failed:",
+    "aiorpcerror",
+)
+
+ALIVE_STATUS_TOKENS = ("alive", "active", "healthy", "connected")
+
+
+def _is_implant_timeout_error(text: str) -> bool:
+    """Detect Sliver AioRpcError DEADLINE_EXCEEDED / implant timeout."""
+    if not text:
+        return False
+    low = text.lower()
+
+    # Strong signal: the exact Sliver RPC phrasing.
+    if "statuscode.deadline_exceeded" in low or "implant timeout" in low:
+        return True
+
+    # Weaker heuristic: AioRpcError + timeout wording.
+    if "aiorpcerror" in low and (
+        "deadline" in low or "timeout" in low or "timed out" in low
+    ):
+        return True
+
+    return any(p in low for p in IMPLANT_TIMEOUT_PATTERNS)
+
+
+def _parse_sessions(output_text: str):
+    """Parse the human-readable list_sessions output into a list of dicts.
+
+    The Sliver MCP `list_sessions` tool emits blocks like:
+
+        ID:        9d9e8d20-...
+        Name:      TENDER_PLAY
+        Hostname:  adm-01
+        ...
+        Status:    Alive
+        Last Seen: 2026-10-27 11:41:35
+        --------------------------------------------------
+    """
+    sessions = []
+    current = {}
+    for line in output_text.splitlines():
+        stripped = line.strip()
+        if not stripped:
+            continue
+        # New record boundary
+        if stripped.startswith("----"):
+            if current.get("id"):
+                sessions.append(current)
+            current = {}
+            continue
+        m = re.match(r"^([A-Za-z][A-Za-z /]+?):\s*(.*)$", stripped)
+        if not m:
+            continue
+        key = m.group(1).strip().lower().replace(" ", "_")
+        val = m.group(2).strip()
+        if key == "id":
+            current["id"] = val
+        elif key == "status":
+            current["status"] = val
+        elif key == "hostname":
+            current["hostname"] = val
+        elif key == "user":
+            current["user"] = val
+        elif key == "os/arch":
+            current["os_arch"] = val
+        elif key == "remote":
+            current["remote"] = val
+    if current.get("id"):
+        sessions.append(current)
+    return sessions
+
+
+async def _wait_for_alive_session(
+    sessions: dict,
+    preferred_prefix: str,
+    *,
+    poll_interval: float = 10.0,
+    hard_deadline=None,
+    exclude_ids=None,
+):
+    """Poll list_sessions until an Alive session appears.
+
+    Keeps going indefinitely unless `hard_deadline` (an absolute
+    time.monotonic() value) is provided, in which case it returns None once
+    that moment is reached.
+    """
+    exclude_ids = set(exclude_ids or [])
+    target_session = sessions.get(preferred_prefix) or next(iter(sessions.values()))
+    attempt = 0
+
+    while True:
+        if hard_deadline is not None and time.monotonic() >= hard_deadline:
+            print("[!] Hard deadline hit while waiting for a live session.")
+            return None
+
+        attempt += 1
+        try:
+            result = await target_session.call_tool("list_sessions", {})
+            output_text = "".join(
+                c.text for c in result.content if hasattr(c, "text")
+            )
+        except Exception as e:
+            print(f"[!] list_sessions poll #{attempt} failed: {e}. Retrying in {poll_interval}s.")
+            await asyncio.sleep(poll_interval)
+            continue
+
+        parsed = _parse_sessions(output_text)
+        alive = [
+            s for s in parsed
+            if s.get("status", "").lower() in ALIVE_STATUS_TOKENS
+            and s.get("id") not in exclude_ids
+        ]
+        if alive:
+            chosen = alive[0]
+            print(
+                f"[+] Found alive session {chosen['id']} "
+                f"(host={chosen.get('hostname')}, user={chosen.get('user')}) "
+                f"after {attempt} poll(s)."
+            )
+            return chosen["id"]
+
+        print(
+            f"[!] No alive sessions yet (attempt {attempt}, "
+            f"parsed {len(parsed)} total). Sleeping {poll_interval}s..."
+        )
+        await asyncio.sleep(poll_interval)
+
+
+# ---------------------------------------------------------------------------
+# MCP tool wrapper
+# ---------------------------------------------------------------------------
 @observe(as_type="tool", name="MCP Tool Call")
 async def call_mcp_tool(target_session, tool_name: str, args: dict) -> str:
     langfuse.update_current_span(
@@ -43,12 +184,12 @@ async def call_mcp_tool(target_session, tool_name: str, args: dict) -> str:
         MAX_CHARS = 15000  # Roughly 4,000 tokens
         if len(output_text) > MAX_CHARS:
             output_text = (
-                output_text[:MAX_CHARS] + 
-                f"\n\n...[OUTPUT TRUNCATED. Original length: {len(output_text)} chars. "
+                output_text[:MAX_CHARS]
+                + f"\n\n...[OUTPUT TRUNCATED. Original length: {len(output_text)} chars. "
                 "DO NOT run commands with the '/s' flag on large directories. "
                 "Use more specific paths.]"
             )
-            
+
         langfuse.update_current_span(output=output_text)
         return output_text
     except Exception as e:
@@ -69,7 +210,7 @@ async def run_autonomous_agent(
     max_runtime_hours: float = 1.0,
 ):
     config_path = "mcp_config.json"
-    
+
     if not os.path.exists(config_path):
         raise FileNotFoundError(f"Configuration file '{config_path}' not found.")
 
@@ -110,7 +251,7 @@ async def run_autonomous_agent(
                     "function": {
                         "name": f"{server_name}__{tool.name}",
                         "description": tool.description,
-                        "parameters": tool.input_schema if hasattr(tool, "input_schema") else tool.inputSchema, 
+                        "parameters": tool.input_schema if hasattr(tool, "input_schema") else tool.inputSchema,
                     },
                 })
 
@@ -124,10 +265,17 @@ async def run_autonomous_agent(
         start_time = time.monotonic()
         deadline = start_time + (max_runtime_hours * 3600)
 
+        # Track the currently-active implant session ID so we can rebind on timeout.
+        # NOTE: `session_id` is the LANGFUSE session id, not an implant id.
+        # We initialize the implant id lazily from the first tool call that
+        # includes one, so we never pollute dead_implant_ids with a Langfuse id.
+        current_implant_session_id = None
+        dead_implant_ids = set()
+
         with langfuse.start_as_current_observation(
-              as_type="span",
-              name="post-exploitation-trial",
-              input={"trial": trial_number, "model": model_name},
+            as_type="span",
+            name="post-exploitation-trial",
+            input={"trial": trial_number, "model": model_name},
         ) as trial_span:
 
             with propagate_attributes(
@@ -149,7 +297,7 @@ async def run_autonomous_agent(
                         elapsed_min = (time.monotonic() - start_time) / 60
                         print(f"[!] Max runtime ({max_runtime_hours}h) exceeded after {elapsed_min:.1f} min.")
                         break
-                    
+
                     # --- RATE LIMIT HANDLING LOOP START ---
                     response = None
                     while True:
@@ -161,8 +309,8 @@ async def run_autonomous_agent(
                                 tool_choice="auto",
                                 parallel_tool_calls=False,
                             )
-                            break # Success, break out of the retry loop
-                        except openai.RateLimitError as e:
+                            break  # Success, break out of the retry loop
+                        except openai.RateLimitError:
                             print("[!] 429 Too Many Requests hit. Rate limited by the API.")
                             print("[!] Waiting 60 seconds before trying again...")
                             await asyncio.sleep(60)
@@ -213,10 +361,10 @@ async def run_autonomous_agent(
                         # Small throttle when the AI just talks
                         await asyncio.sleep(3)
                         continue
-                    
+
                     for tool_call in msg.tool_calls:
                         full_tool_name = tool_call.function.name
-                        
+
                         # --- ROBUST TOOL PARSING FIX ---
                         if "__" in full_tool_name:
                             server_prefix, original_tool_name = full_tool_name.split("__", 1)
@@ -243,7 +391,35 @@ async def run_autonomous_agent(
                                 "content": output_text,
                             })
                             continue
-                        
+
+                        # Track whatever implant id the model used, so we can
+                        # detect and rebind known-dead sessions later.
+                        arg_session = args.get("session_id") if isinstance(args, dict) else None
+                        if arg_session:
+                            current_implant_session_id = arg_session
+
+                        # If the model is targeting a known-dead implant, rebind first.
+                        if arg_session and arg_session in dead_implant_ids:
+                            print(f"[!] Model tried to use dead session {arg_session}. Rebinding...")
+                            new_id = await _wait_for_alive_session(
+                                sessions,
+                                preferred_prefix=server_prefix,
+                                hard_deadline=deadline,
+                                exclude_ids=dead_implant_ids,
+                            )
+                            if new_id:
+                                current_implant_session_id = new_id
+                                dead_implant_ids.discard(new_id)
+                                args["session_id"] = new_id
+                                print(f"[+] Rebound tool args to new session {new_id}.")
+                            else:
+                                messages.append({
+                                    "role": "tool",
+                                    "tool_call_id": tool_call.id,
+                                    "content": "ERROR: no active session available. Waiting for implant to reconnect.",
+                                })
+                                continue
+
                         print(f"-> [{server_prefix}] {original_tool_name}")
                         target_session = sessions[server_prefix]
 
@@ -254,22 +430,68 @@ async def run_autonomous_agent(
                         except Exception as e:
                             output_text = f"ERROR executing tool: {e}"
 
+                        # ---- Detect implant timeout and auto-rebind ----
+                        if _is_implant_timeout_error(output_text):
+                            failed_id = arg_session or current_implant_session_id
+                            print(
+                                f"[!] Implant timeout detected on session {failed_id}. "
+                                f"Entering reconnect loop..."
+                            )
+                            if failed_id:
+                                dead_implant_ids.add(failed_id)
+
+                            new_id = await _wait_for_alive_session(
+                                sessions,
+                                preferred_prefix=server_prefix,
+                                hard_deadline=deadline,
+                                exclude_ids=dead_implant_ids,
+                            )
+
+                            if new_id:
+                                current_implant_session_id = new_id
+                                dead_implant_ids.discard(new_id)
+                                messages.append({
+                                    "role": "tool",
+                                    "tool_call_id": tool_call.id,
+                                    "content": (
+                                        f"ERROR: implant session {failed_id} timed out.\n"
+                                        f"Raw error: {output_text[:500]}\n\n"
+                                        f"A NEW active session is now available: {new_id}. "
+                                        f"You MUST use session_id={new_id} for all subsequent tool calls. "
+                                        f"Do not reuse the old session ID. Continue your task."
+                                    ),
+                                })
+                            else:
+                                messages.append({
+                                    "role": "tool",
+                                    "tool_call_id": tool_call.id,
+                                    "content": (
+                                        f"ERROR: implant session {failed_id} timed out.\n"
+                                        f"Raw error: {output_text[:500]}\n\n"
+                                        "No replacement session came up before the run deadline. "
+                                        "You may retry list_sessions if time remains."
+                                    ),
+                                })
+                            continue  # skip normal message append; already appended
+                        # -------------------------------------------------
+
                         messages.append({
                             "role": "tool",
                             "tool_call_id": tool_call.id,
                             "content": output_text,
                         })
-                    
+
                     # Small sleep after a full turn to let the API breathe
                     await asyncio.sleep(3)
 
-            elapsed_min = (time.monotonic()- start_time) / 60
+            elapsed_min = (time.monotonic() - start_time) / 60
             trial_span.update(
                 output={
                     "session_id": session_id,
                     "trial": trial_number,
                     "model": model_name,
                     "runtime_minutes": round(elapsed_min, 2),
+                    "final_implant_session_id": current_implant_session_id,
                 }
             )
 
@@ -288,7 +510,7 @@ async def run_autonomous_agent(
 if __name__ == "__main__":
     MODEL = "gpt-oss:120b"
     FRAMEWORK = "SliverC2"
-    
+
     print(f"=== Starting MCP Session using {MODEL} ===")
     asyncio.run(
         run_autonomous_agent(
