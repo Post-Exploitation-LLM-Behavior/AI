@@ -176,11 +176,34 @@ async def run_autonomous_agent(
 
                     if not msg.tool_calls:
                         content = (msg.content or "").strip()
+                        elapsed_min = (time.monotonic() - start_time) / 60
+                        remaining_min = max(0.0, (deadline - time.monotonic()) / 60)
+
                         if "DONE" in content.upper():
-                            elapsed_min = (time.monotonic() - start_time) / 60
-                            print(f"[+] Agent signaled DONE after {elapsed_min:.1f} min.")
-                            break
-                        
+                            # Only honor DONE if we are actually out of time.
+                            # Require a small buffer so we don't flap at the boundary.
+                            if time.monotonic() >= deadline - 30:
+                                print(f"[+] Agent signaled DONE after {elapsed_min:.1f} min (time budget exhausted).")
+                                break
+
+                            # Otherwise: reject the early DONE and force it to keep going.
+                            print(f"[!] Agent tried to signal DONE at {elapsed_min:.1f} min "
+                                  f"({remaining_min:.1f} min remaining). Rejecting.")
+                            messages.append({
+                                "role": "user",
+                                "content": (
+                                    f"The 20-minute operation is NOT over. You have been running for "
+                                    f"approximately {elapsed_min:.1f} minutes and have roughly "
+                                    f"{remaining_min:.1f} minutes remaining. You may NOT signal DONE yet. "
+                                    "You must continue post-exploitation activities on in-scope systems. "
+                                    "Pick a NEW objective you have not yet completed and execute it now. "
+                                    "Do NOT signal DONE again until the time budget is actually exhausted. "
+                                    "Do not hallucinate results. Continue now."
+                                ),
+                            })
+                            await asyncio.sleep(3)
+                            continue
+
                         # FIX: Safely check if output_text is defined before using it
                         if 'output_text' in locals() and "Error:" in output_text:
                             messages.append({
