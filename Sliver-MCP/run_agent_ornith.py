@@ -31,50 +31,26 @@ langfuse = get_client()
 # ---------------------------------------------------------------------------
 # Implant-timeout detection + session rebind helpers
 # ---------------------------------------------------------------------------
-# Only the genuine Sliver implant-timeout signal. A generic tool failure
-# (bad args, missing file, unsupported command, etc.) must NOT match here,
-# otherwise the agent rebinds sessions on every unrelated error.
 IMPLANT_TIMEOUT_MARKER = "implant timeout"
 
 ALIVE_STATUS_TOKENS = ("alive", "active", "healthy", "connected")
 
 
 def _is_implant_timeout_error(text: str) -> bool:
-    """Detect ONLY the Sliver implant timeout.
-
-    Matches the exact RPC detail Sliver emits when the implant stops
-    responding, e.g.:
-
-        Execution failed: <AioRpcError of RPC that terminated with:
-        status = StatusCode.DEADLINE_EXCEEDED
-        details = "implant timeout"
-        debug_error_string = "DEADLINE_EXCEEDED:implant timeout"
-    """
+    """Detect ONLY the Sliver implant timeout."""
     if not text:
         return False
     return IMPLANT_TIMEOUT_MARKER in text.lower()
 
 
 def _parse_sessions(output_text: str):
-    """Parse the human-readable list_sessions output into a list of dicts.
-
-    The Sliver MCP `list_sessions` tool emits blocks like:
-
-        ID:        9d9e8d20-...
-        Name:      TENDER_PLAY
-        Hostname:  adm-01
-        ...
-        Status:    Alive
-        Last Seen: 2026-10-27 11:41:35
-        --------------------------------------------------
-    """
+    """Parse the human-readable list_sessions output into a list of dicts."""
     sessions = []
     current = {}
     for line in output_text.splitlines():
         stripped = line.strip()
         if not stripped:
             continue
-        # New record boundary
         if stripped.startswith("----"):
             if current.get("id"):
                 sessions.append(current)
@@ -110,12 +86,7 @@ async def _wait_for_alive_session(
     hard_deadline=None,
     exclude_ids=None,
 ):
-    """Poll list_sessions until an Alive session appears.
-
-    Keeps going indefinitely unless `hard_deadline` (an absolute
-    time.monotonic() value) is provided, in which case it returns None once
-    that moment is reached.
-    """
+    """Poll list_sessions until an Alive session appears."""
     exclude_ids = set(exclude_ids or [])
     target_session = sessions.get(preferred_prefix) or next(iter(sessions.values()))
     attempt = 0
@@ -261,10 +232,6 @@ async def run_autonomous_agent(
         start_time = time.monotonic()
         deadline = start_time + (max_runtime_hours * 3600)
 
-        # Track the currently-active implant session ID so we can rebind on timeout.
-        # NOTE: `session_id` is the LANGFUSE session id, not an implant id.
-        # We initialize the implant id lazily from the first tool call that
-        # includes one, so we never pollute dead_implant_ids with a Langfuse id.
         current_implant_session_id = None
         dead_implant_ids = set()
 
@@ -322,16 +289,29 @@ async def run_autonomous_agent(
                             
                             # Handle llama-server's broken JSON generation
                             if "invalid tool call arguments" in error_str or "unexpected end of JSON input" in error_str:
-                                print(f"[!] llama-server generated broken JSON. Purging the bad message and retrying...")
-                                if messages and messages[-1]["role"] == "assistant":
+                                print(f"[!] llama-server generated broken JSON. Rolling back and injecting format correction...")
+                                
+                                # Roll back to the last user/tool message
+                                while messages and messages[-1]["role"] != "user" and messages[-1]["role"] != "tool":
                                     messages.pop()
+                                
+                                # Inject an ephemeral user message telling it exactly what went wrong
+                                messages.append({
+                                    "role": "user",
+                                    "content": (
+                                        "ERROR: The API rejected your last tool call because the JSON was malformed (`unexpected end of JSON input`). "
+                                        "This usually happens when you try to pass massive, multi-line PowerShell scripts with unescaped quotes into the `command` argument. "
+                                        "You MUST fix this immediately. Keep commands short and on a single line. "
+                                        "If you need to run a complex script, use `upload_file` to place a `.ps1` file on the target, and then use `execute_command` to run it."
+                                    )
+                                })
                                 await asyncio.sleep(2)
                                 continue
                             
                             # Handle the 400 error caused by double assistant messages
-                            if "Cannot have 2 or more assistant messages" in error_str:
-                                print(f"[!] API rejected history (double assistant message). Purging and retrying...")
-                                if messages and messages[-1]["role"] == "assistant":
+                            if "Cannot continue an assistant message" in error_str or "Cannot have 2 or more assistant messages" in error_str:
+                                print(f"[!] API rejected history. Rolling back to last user message...")
+                                while messages and messages[-1]["role"] == "assistant":
                                     messages.pop()
                                 await asyncio.sleep(2)
                                 continue
