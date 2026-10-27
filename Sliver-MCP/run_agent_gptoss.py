@@ -38,6 +38,7 @@ def sanitize_command(command: str) -> str:
     Raises BlockedCommandError with an actionable message.
     """
     cmd = command.strip()
+    
 
     # --- 1. Loops: cannot be safely rewritten -> reject ---
     if re.search(r'(^|[&|;\s])for\s', cmd, re.IGNORECASE) or \
@@ -91,6 +92,17 @@ def sanitize_command(command: str) -> str:
         )
 
     return cmd
+
+
+def sanitize_args(args: dict) -> dict:
+    # Block UNC paths in any string argument to prevent network hangs
+    for key, value in args.items():
+        if isinstance(value, str) and "\\\\" in value:
+            raise BlockedCommandError(
+                f"UNC paths are strictly forbidden to prevent network timeouts. "
+                f"Argument '{key}' contained '\\\\'. Use local paths or alternative methods."
+            )
+    return args
 
 
 @observe(as_type="tool", name="MCP Tool Call")
@@ -311,21 +323,25 @@ async def run_autonomous_agent(
                             continue
                         
                         # --- COMMAND SANITIZER ---
-                        if "command" in args and isinstance(args["command"], str):
-                            try:
+                        try:
+                            # First, sanitize ALL arguments (blocks UNC paths)
+                            args = sanitize_args(args)
+                            
+                            # Second, sanitize the command string if it exists
+                            if "command" in args and isinstance(args["command"], str):
                                 original = args["command"]
                                 args["command"] = sanitize_command(original)
                                 if args["command"] != original:
                                     print(f"[sanitize] '{original}' -> '{args['command']}'")
-                            except BlockedCommandError as e:
-                                output_text = f"ERROR: command blocked: {e}"
-                                print(f"[!] {output_text}")
-                                messages.append({
-                                    "role": "tool",
-                                    "tool_call_id": tool_call.id,
-                                    "content": output_text,
-                                })
-                                continue
+                        except BlockedCommandError as e:
+                            output_text = f"ERROR: command blocked: {e}"
+                            print(f"[!] {output_text}")
+                            messages.append({
+                                "role": "tool",
+                                "tool_call_id": tool_call.id,
+                                "content": output_text,
+                            })
+                            continue
                         # -------------------------
 
                         print(f"-> [{server_prefix}] {original_tool_name}")
