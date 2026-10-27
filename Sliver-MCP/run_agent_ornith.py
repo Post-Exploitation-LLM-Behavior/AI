@@ -31,6 +31,9 @@ langfuse = get_client()
 # ---------------------------------------------------------------------------
 # Implant-timeout detection + session rebind helpers
 # ---------------------------------------------------------------------------
+# Only the genuine Sliver implant-timeout signal. A generic tool failure
+# (bad args, missing file, unsupported command, etc.) must NOT match here,
+# otherwise the agent rebinds sessions on every unrelated error.
 IMPLANT_TIMEOUT_MARKER = "implant timeout"
 
 ALIVE_STATUS_TOKENS = ("alive", "active", "healthy", "connected")
@@ -51,6 +54,7 @@ def _parse_sessions(output_text: str):
         stripped = line.strip()
         if not stripped:
             continue
+        # New record boundary
         if stripped.startswith("----"):
             if current.get("id"):
                 sessions.append(current)
@@ -264,12 +268,10 @@ async def run_autonomous_agent(
                     # --- RATE LIMIT HANDLING LOOP START ---
                     response = None
                     while True:
-                        # Prevent 400 Bad Request by ensuring we don't end on an assistant message
-                        if messages and messages[-1]["role"] == "assistant":
-                            print("[!] History ends with an assistant message (likely from a failed retry). Purging...")
+                        # 1. Ensure history never ends on an assistant message.
+                        while messages and messages[-1]["role"] == "assistant":
+                            print("[!] History ends with an assistant message. Purging...")
                             messages.pop()
-                            if messages and messages[-1]["role"] == "tool":
-                                messages.pop()
 
                         try:
                             response = await genai_client.chat.completions.create(
@@ -279,7 +281,8 @@ async def run_autonomous_agent(
                                 tool_choice="auto",
                                 parallel_tool_calls=False,
                             )
-                            break  # Success, break out of the retry loop
+                            break  # Success!
+                            
                         except openai.RateLimitError:
                             print("[!] 429 Too Many Requests hit. Rate limited by the API.")
                             print("[!] Waiting 60 seconds before trying again...")
@@ -289,29 +292,24 @@ async def run_autonomous_agent(
                             
                             # Handle llama-server's broken JSON generation
                             if "invalid tool call arguments" in error_str or "unexpected end of JSON input" in error_str:
-                                print(f"[!] llama-server generated broken JSON. Rolling back and injecting format correction...")
+                                print(f"[!] llama-server generated broken JSON. Rolling back...")
                                 
-                                # Roll back to the last user/tool message
+                                # Roll back until we hit the last 'user' or 'tool' message
                                 while messages and messages[-1]["role"] != "user" and messages[-1]["role"] != "tool":
                                     messages.pop()
                                 
-                                # Inject an ephemeral user message telling it exactly what went wrong
+                                # Inject a correction
                                 messages.append({
                                     "role": "user",
-                                    "content": (
-                                        "ERROR: The API rejected your last tool call because the JSON was malformed (`unexpected end of JSON input`). "
-                                        "This usually happens when you try to pass massive, multi-line PowerShell scripts with unescaped quotes into the `command` argument. "
-                                        "You MUST fix this immediately. Keep commands short and on a single line. "
-                                        "If you need to run a complex script, use `upload_file` to place a `.ps1` file on the target, and then use `execute_command` to run it."
-                                    )
+                                    "content": "ERROR: Your last tool call generated invalid JSON. Keep commands short and on a single line. Do not use massive multi-line scripts."
                                 })
                                 await asyncio.sleep(2)
                                 continue
                             
-                            # Handle the 400 error caused by double assistant messages
+                            # Handle 400 error caused by double assistant messages
                             if "Cannot continue an assistant message" in error_str or "Cannot have 2 or more assistant messages" in error_str:
-                                print(f"[!] API rejected history. Rolling back to last user message...")
-                                while messages and messages[-1]["role"] == "assistant":
+                                print(f"[!] API rejected history. Rolling back...")
+                                while messages and messages[-1]["role"] != "user" and messages[-1]["role"] != "tool":
                                     messages.pop()
                                 await asyncio.sleep(2)
                                 continue
