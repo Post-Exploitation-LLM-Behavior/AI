@@ -263,7 +263,7 @@ async def run_autonomous_agent(
 
 
 if __name__ == "__main__":
-    MODEL = "qwen3.5:latest"
+    MODEL = "gpt-oss:120b"
     FRAMEWORK = "SliverC2"
     
     print(f"=== Starting MCP Session using {MODEL} ===")
