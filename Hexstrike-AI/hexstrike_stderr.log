@@ -1,0 +1,419 @@
+
+
+╭──────────────────────────────────────────────────────────────────────────────╮
+│                                                                              │
+│                                                                              │
+│                         ▄▀▀ ▄▀█ █▀▀ ▀█▀ █▀▄▀█ █▀▀ █▀█                        │
+│                         █▀  █▀█ ▄▄█  █  █ ▀ █ █▄▄ █▀▀                        │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                FastMCP 4.1.6                                 │
+│                            https://gofastmcp.com                             │
+│                                                                              │
+│            🖥  Server:      HexStrike AI Direct MCP Server, 4.1.6             │
+│            🚀 Deploy free: https://horizon.prefect.io                        │
+│                                                                              │
+╰──────────────────────────────────────────────────────────────────────────────╯
+
+
+[11/03/26 10:35:45] INFO     Starting MCP server 'HexStrike AI  transport.py:358
+                             Direct MCP Server' with transport                  
+                             'sse' on http://0.0.0.0:8889/sse                   
+INFO:     Started server process [84346]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+ERROR:    [Errno 98] error while attempting to bind on address ('0.0.0.0', 8889): address already in use
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+
+
+╭──────────────────────────────────────────────────────────────────────────────╮
+│                                                                              │
+│                                                                              │
+│                         ▄▀▀ ▄▀█ █▀▀ ▀█▀ █▀▄▀█ █▀▀ █▀█                        │
+│                         █▀  █▀█ ▄▄█  █  █ ▀ █ █▄▄ █▀▀                        │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                FastMCP 4.1.6                                 │
+│                            https://gofastmcp.com                             │
+│                                                                              │
+│            🖥  Server:      HexStrike AI Direct MCP Server, 4.1.6             │
+│            🚀 Deploy free: https://horizon.prefect.io                        │
+│                                                                              │
+╰──────────────────────────────────────────────────────────────────────────────╯
+
+
+[11/03/26 10:38:27] INFO     Starting MCP server 'HexStrike AI  transport.py:358
+                             Direct MCP Server' with transport                  
+                             'sse' on http://0.0.0.0:8889/sse                   
+INFO:     Started server process [85605]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+ERROR:    [Errno 98] error while attempting to bind on address ('0.0.0.0', 8889): address already in use
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+
+
+╭──────────────────────────────────────────────────────────────────────────────╮
+│                                                                              │
+│                                                                              │
+│                         ▄▀▀ ▄▀█ █▀▀ ▀█▀ █▀▄▀█ █▀▀ █▀█                        │
+│                         █▀  █▀█ ▄▄█  █  █ ▀ █ █▄▄ █▀▀                        │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                FastMCP 4.1.6                                 │
+│                            https://gofastmcp.com                             │
+│                                                                              │
+│            🖥  Server:      HexStrike AI Direct MCP Server, 4.1.6             │
+│            🚀 Deploy free: https://horizon.prefect.io                        │
+│                                                                              │
+╰──────────────────────────────────────────────────────────────────────────────╯
+
+
+[11/03/26 10:38:55] INFO     Starting MCP server 'HexStrike AI  transport.py:358
+                             Direct MCP Server' with transport                  
+                             'sse' on http://0.0.0.0:8889/sse                   
+INFO:     Started server process [86206]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8889 (Press CTRL+C to quit)
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [86206]
+Traceback (most recent call last):
+  File "/home/student/Desktop/AI/Hexstrike-AI/hexstrike-ai/hexstrike_mcp.py", line 29, in <module>
+    from mcp.server.fastmcp import FastMCP
+  File "/home/student/.local/lib/python3.12/site-packages/mcp/server/fastmcp.py", line 16, in <module>
+    raise ModuleNotFoundError(_MESSAGE, name=__name__)
+ModuleNotFoundError: No module named 'mcp.server.fastmcp'. This is mcp 2.x, where FastMCP was renamed to MCPServer (from mcp.server.mcpserver import MCPServer) and other APIs changed; see the migration guide at https://py.sdk.modelcontextprotocol.io/v2/migration/#fastmcp-renamed-to-mcpserver or pin 'mcp<2' to keep running v1 code.
+Traceback (most recent call last):
+  File "/home/student/Desktop/AI/Hexstrike-AI/hexstrike-ai/hexstrike_mcp.py", line 29, in <module>
+    from mcp.server.fastmcp import FastMCP
+  File "/home/student/.local/lib/python3.12/site-packages/mcp/server/fastmcp.py", line 16, in <module>
+    raise ModuleNotFoundError(_MESSAGE, name=__name__)
+ModuleNotFoundError: No module named 'mcp.server.fastmcp'. This is mcp 2.x, where FastMCP was renamed to MCPServer (from mcp.server.mcpserver import MCPServer) and other APIs changed; see the migration guide at https://py.sdk.modelcontextprotocol.io/v2/migration/#fastmcp-renamed-to-mcpserver or pin 'mcp<2' to keep running v1 code.
+Traceback (most recent call last):
+  File "/home/student/Desktop/AI/Hexstrike-AI/hexstrike-ai/hexstrike_mcp.py", line 29, in <module>
+    from mcp.server.fastmcp import FastMCP
+  File "/home/student/.local/lib/python3.12/site-packages/mcp/server/fastmcp.py", line 16, in <module>
+    raise ModuleNotFoundError(_MESSAGE, name=__name__)
+ModuleNotFoundError: No module named 'mcp.server.fastmcp'. This is mcp 2.x, where FastMCP was renamed to MCPServer (from mcp.server.mcpserver import MCPServer) and other APIs changed; see the migration guide at https://py.sdk.modelcontextprotocol.io/v2/migration/#fastmcp-renamed-to-mcpserver or pin 'mcp<2' to keep running v1 code.
+Traceback (most recent call last):
+  File "/home/student/Desktop/AI/Hexstrike-AI/hexstrike-ai/hexstrike_mcp.py", line 29, in <module>
+    from mcp.server.fastmcp import FastMCP
+  File "/home/student/.local/lib/python3.12/site-packages/mcp/server/fastmcp.py", line 16, in <module>
+    raise ModuleNotFoundError(_MESSAGE, name=__name__)
+ModuleNotFoundError: No module named 'mcp.server.fastmcp'. This is mcp 2.x, where FastMCP was renamed to MCPServer (from mcp.server.mcpserver import MCPServer) and other APIs changed; see the migration guide at https://py.sdk.modelcontextprotocol.io/v2/migration/#fastmcp-renamed-to-mcpserver or pin 'mcp<2' to keep running v1 code.
+[🔥 HexStrike MCP] 2026-11-03 11:33:08 [INFO] [38;5;46m✅ 🚀 Starting HexStrike AI MCP Client v6.0[0m
+[🔥 HexStrike MCP] 2026-11-03 11:33:08 [INFO] [38;5;46m✅ 🔗 Connecting to: http://localhost:8888[0m
+[🔥 HexStrike MCP] 2026-11-03 11:33:08 [INFO] [38;5;46m✅ 🔗 Attempting to connect to HexStrike AI API at http://localhost:8888 (attempt 1/3)[0m
+[🔥 HexStrike MCP] 2026-11-03 11:33:09 [INFO] [38;5;46m✅ 🎯 Successfully connected to HexStrike AI API Server at http://localhost:8888[0m
+[🔥 HexStrike MCP] 2026-11-03 11:33:09 [INFO] [38;5;46m✅ 🏥 Server health status: healthy[0m
+[🔥 HexStrike MCP] 2026-11-03 11:33:09 [INFO] [38;5;46m✅ 📊 Server version: 6.0.0[0m
+[🔥 HexStrike MCP] 2026-11-03 11:33:11 [INFO] [38;5;46m✅ 🎯 Successfully connected to HexStrike AI API server at http://localhost:8888[0m
+[🔥 HexStrike MCP] 2026-11-03 11:33:11 [INFO] [38;5;46m✅ 🏥 Server health status: healthy[0m
+[🔥 HexStrike MCP] 2026-11-03 11:33:11 [INFO] [38;5;46m✅ 📊 Version: 6.0.0[0m
+[🔥 HexStrike MCP] 2026-11-03 11:33:11 [WARNING] [38;5;208m⚠️ ⚠️  Not all essential tools are available on the HexStrike server[0m
+[🔥 HexStrike MCP] 2026-11-03 11:33:11 [WARNING] [38;5;208m⚠️ ❌ Missing tools: aircrack-ng, aireplay-ng, airmon-ng, airodump-ng, amass...[0m
+[🔥 HexStrike MCP] 2026-11-03 11:33:11 [WARNING] [38;5;208m⚠️ Tool already exists: httpx_probe[0m
+[🔥 HexStrike MCP] 2026-11-03 11:33:11 [INFO] [38;5;46m✅ 🚀 Starting HexStrike AI MCP server[0m
+[🔥 HexStrike MCP] 2026-11-03 11:33:11 [INFO] [38;5;46m✅ 🤖 Ready to serve AI agents with enhanced cybersecurity capabilities[0m
+[🔥 HexStrike MCP] 2026-11-03 11:33:11 [INFO] [38;5;46m✅ Processing request of type ListToolsRequest[0m
+[🔥 HexStrike MCP] 2026-11-03 11:34:08 [INFO] [38;5;46m✅ Processing request of type CallToolRequest[0m
+[🔥 HexStrike MCP] 2026-11-03 11:34:08 [INFO] [38;5;46m✅ [38;5;202m🔍 Initiating Nmap scan: 172.16.0.2-172.16.0.255,192.168.10.2-192.168.10.255,10.1.1.2-10.1.1.255[0m[0m
+[🔥 HexStrike MCP] 2026-11-03 11:34:08 [ERROR] [38;5;196m❌ [38;5;196m❌ Nmap scan failed for 172.16.0.2-172.16.0.255,192.168.10.2-192.168.10.255,10.1.1.2-10.1.1.255[0m[0m
+[🔥 HexStrike MCP] 2026-11-03 11:34:21 [INFO] [38;5;46m✅ Processing request of type CallToolRequest[0m
+[🔥 HexStrike MCP] 2026-11-03 11:34:21 [INFO] [38;5;46m✅ ⚡ Starting Rustscan: 172.16.0.2-172.16.0.255,192.168.10.2-192.168.10.255,10.1.1.2-10.1.1.255[0m
+[🔥 HexStrike MCP] 2026-11-03 11:34:21 [ERROR] [38;5;196m❌ ❌ Rustscan failed for 172.16.0.2-172.16.0.255,192.168.10.2-192.168.10.255,10.1.1.2-10.1.1.255[0m
+[🔥 HexStrike MCP] 2026-11-03 11:34:34 [INFO] [38;5;46m✅ Processing request of type CallToolRequest[0m
+[🔥 HexStrike MCP] 2026-11-03 11:34:34 [INFO] [38;5;46m✅ 🔍 Starting arp-scan: 172.16.0.2-172.16.0.255,192.168.10.2-192.168.10.255,10.1.1.2-10.1.1.255[0m
+[🔥 HexStrike MCP] 2026-11-03 11:34:34 [ERROR] [38;5;196m❌ ❌ arp-scan failed[0m
+[🔥 HexStrike MCP] 2026-11-03 11:38:02 [INFO] [38;5;46m✅ 🚀 Starting HexStrike AI MCP Client v6.0[0m
+[🔥 HexStrike MCP] 2026-11-03 11:38:02 [INFO] [38;5;46m✅ 🔗 Connecting to: http://localhost:8888[0m
+[🔥 HexStrike MCP] 2026-11-03 11:38:02 [INFO] [38;5;46m✅ 🔗 Attempting to connect to HexStrike AI API at http://localhost:8888 (attempt 1/3)[0m
+[🔥 HexStrike MCP] 2026-11-03 11:38:03 [INFO] [38;5;46m✅ 🎯 Successfully connected to HexStrike AI API Server at http://localhost:8888[0m
+[🔥 HexStrike MCP] 2026-11-03 11:38:03 [INFO] [38;5;46m✅ 🏥 Server health status: healthy[0m
+[🔥 HexStrike MCP] 2026-11-03 11:38:03 [INFO] [38;5;46m✅ 📊 Server version: 6.0.0[0m
+[🔥 HexStrike MCP] 2026-11-03 11:38:05 [INFO] [38;5;46m✅ 🎯 Successfully connected to HexStrike AI API server at http://localhost:8888[0m
+[🔥 HexStrike MCP] 2026-11-03 11:38:05 [INFO] [38;5;46m✅ 🏥 Server health status: healthy[0m
+[🔥 HexStrike MCP] 2026-11-03 11:38:05 [INFO] [38;5;46m✅ 📊 Version: 6.0.0[0m
+[🔥 HexStrike MCP] 2026-11-03 11:38:05 [WARNING] [38;5;208m⚠️ ⚠️  Not all essential tools are available on the HexStrike server[0m
+[🔥 HexStrike MCP] 2026-11-03 11:38:05 [WARNING] [38;5;208m⚠️ ❌ Missing tools: aircrack-ng, aireplay-ng, airmon-ng, airodump-ng, amass...[0m
+[🔥 HexStrike MCP] 2026-11-03 11:38:05 [WARNING] [38;5;208m⚠️ Tool already exists: httpx_probe[0m
+[🔥 HexStrike MCP] 2026-11-03 11:38:05 [INFO] [38;5;46m✅ 🚀 Starting HexStrike AI MCP server[0m
+[🔥 HexStrike MCP] 2026-11-03 11:38:05 [INFO] [38;5;46m✅ 🤖 Ready to serve AI agents with enhanced cybersecurity capabilities[0m
+[🔥 HexStrike MCP] 2026-11-03 11:38:05 [INFO] [38;5;46m✅ Processing request of type ListToolsRequest[0m
+[🔥 HexStrike MCP] 2026-11-03 11:39:15 [INFO] [38;5;46m✅ Processing request of type CallToolRequest[0m
+[🔥 HexStrike MCP] 2026-11-03 11:39:15 [INFO] [38;5;46m✅ [38;5;202m🔍 Initiating Nmap scan: 10.1.1.0/24[0m[0m
+[🔥 HexStrike MCP] 2026-11-03 11:39:15 [ERROR] [38;5;196m❌ [38;5;196m❌ Nmap scan failed for 10.1.1.0/24[0m[0m
+[🔥 HexStrike MCP] 2026-11-03 11:39:25 [INFO] [38;5;46m✅ Processing request of type CallToolRequest[0m
+[🔥 HexStrike MCP] 2026-11-03 11:39:25 [INFO] [38;5;46m✅ ⚡ Starting Rustscan: 10.1.1.0/24[0m
+[🔥 HexStrike MCP] 2026-11-03 11:39:25 [ERROR] [38;5;196m❌ ❌ Rustscan failed for 10.1.1.0/24[0m
+[🔥 HexStrike MCP] 2026-11-03 11:39:32 [INFO] [38;5;46m✅ Processing request of type CallToolRequest[0m
+[🔥 HexStrike MCP] 2026-11-03 11:39:32 [INFO] [38;5;46m✅ 🔍 Starting arp-scan: 10.1.1.0/24[0m
+[🔥 HexStrike MCP] 2026-11-03 11:39:32 [ERROR] [38;5;196m❌ ❌ arp-scan failed[0m
+[🔥 HexStrike MCP] 2026-11-03 11:39:40 [INFO] [38;5;46m✅ Processing request of type CallToolRequest[0m
+[🔥 HexStrike MCP] 2026-11-03 11:39:40 [INFO] [38;5;46m✅ ⚡ Executing command: powershell.exe Get-Process; whoami /priv[0m
+[🔥 HexStrike MCP] 2026-11-03 11:39:40 [WARNING] [38;5;208m⚠️ ⚠️  Command completed with errors[0m
+[🔥 HexStrike MCP] 2026-11-03 11:39:48 [INFO] [38;5;46m✅ Processing request of type CallToolRequest[0m
+[🔥 HexStrike MCP] 2026-11-03 11:39:48 [INFO] [38;5;46m✅ ⚡ Executing command: cmd.exe /c dir && whoami[0m
+[🔥 HexStrike MCP] 2026-11-03 11:39:48 [WARNING] [38;5;208m⚠️ ⚠️  Command completed with errors[0m
+[🔥 HexStrike MCP] 2026-11-03 11:45:32 [INFO] [38;5;46m✅ 🚀 Starting HexStrike AI MCP Client v6.0[0m
+[🔥 HexStrike MCP] 2026-11-03 11:45:32 [INFO] [38;5;46m✅ 🔗 Connecting to: http://localhost:8888[0m
+[🔥 HexStrike MCP] 2026-11-03 11:45:32 [INFO] [38;5;46m✅ 🔗 Attempting to connect to HexStrike AI API at http://localhost:8888 (attempt 1/3)[0m
+[🔥 HexStrike MCP] 2026-11-03 11:45:34 [INFO] [38;5;46m✅ 🎯 Successfully connected to HexStrike AI API Server at http://localhost:8888[0m
+[🔥 HexStrike MCP] 2026-11-03 11:45:34 [INFO] [38;5;46m✅ 🏥 Server health status: healthy[0m
+[🔥 HexStrike MCP] 2026-11-03 11:45:34 [INFO] [38;5;46m✅ 📊 Server version: 6.0.0[0m
+[🔥 HexStrike MCP] 2026-11-03 11:45:35 [INFO] [38;5;46m✅ 🎯 Successfully connected to HexStrike AI API server at http://localhost:8888[0m
+[🔥 HexStrike MCP] 2026-11-03 11:45:35 [INFO] [38;5;46m✅ 🏥 Server health status: healthy[0m
+[🔥 HexStrike MCP] 2026-11-03 11:45:35 [INFO] [38;5;46m✅ 📊 Version: 6.0.0[0m
+[🔥 HexStrike MCP] 2026-11-03 11:45:35 [WARNING] [38;5;208m⚠️ ⚠️  Not all essential tools are available on the HexStrike server[0m
+[🔥 HexStrike MCP] 2026-11-03 11:45:35 [WARNING] [38;5;208m⚠️ ❌ Missing tools: aircrack-ng, aireplay-ng, airmon-ng, airodump-ng, amass...[0m
+[🔥 HexStrike MCP] 2026-11-03 11:45:35 [WARNING] [38;5;208m⚠️ Tool already exists: httpx_probe[0m
+[🔥 HexStrike MCP] 2026-11-03 11:45:35 [INFO] [38;5;46m✅ 🚀 Starting HexStrike AI MCP server[0m
+[🔥 HexStrike MCP] 2026-11-03 11:45:35 [INFO] [38;5;46m✅ 🤖 Ready to serve AI agents with enhanced cybersecurity capabilities[0m
+[🔥 HexStrike MCP] 2026-11-03 11:45:35 [INFO] [38;5;46m✅ Processing request of type ListToolsRequest[0m
+[🔥 HexStrike MCP] 2026-11-03 11:46:02 [INFO] [38;5;46m✅ Processing request of type CallToolRequest[0m
+[🔥 HexStrike MCP] 2026-11-03 11:46:02 [INFO] [38;5;46m✅ ⚡ Executing command: evil-winrm -i 10.1.1.10 -u 'ecorp\spraino' -p 'cooladmin2026'[0m
+[🔥 HexStrike MCP] 2026-11-03 11:51:02 [INFO] [38;5;46m✅ ✅ Command completed successfully in 300.00s[0m
+[🔥 HexStrike MCP] 2026-11-03 11:51:22 [INFO] [38;5;46m✅ Processing request of type CallToolRequest[0m
+[🔥 HexStrike MCP] 2026-11-03 11:51:22 [INFO] [38;5;46m✅ ⚡ Executing command: powershell.exe whoami[0m
+[🔥 HexStrike MCP] 2026-11-03 11:51:22 [WARNING] [38;5;208m⚠️ ⚠️  Command completed with errors[0m
+[🔥 HexStrike MCP] 2026-11-03 11:51:38 [INFO] [38;5;46m✅ Processing request of type CallToolRequest[0m
+[🔥 HexStrike MCP] 2026-11-03 11:51:38 [INFO] [38;5;46m✅ ⚡ Executing command: cmd.exe[0m
+[🔥 HexStrike MCP] 2026-11-03 11:51:38 [WARNING] [38;5;208m⚠️ ⚠️  Command completed with errors[0m
+[🔥 HexStrike MCP] 2026-11-03 11:51:57 [INFO] [38;5;46m✅ Processing request of type CallToolRequest[0m
+[🔥 HexStrike MCP] 2026-11-03 11:51:57 [INFO] [38;5;46m✅ ⚡ Executing command: echo %COMSPEC%[0m
+[🔥 HexStrike MCP] 2026-11-03 11:51:57 [INFO] [38;5;46m✅ ✅ Command completed successfully in 0.00s[0m
+[🔥 HexStrike MCP] 2026-11-03 11:52:14 [INFO] [38;5;46m✅ Processing request of type CallToolRequest[0m
+[🔥 HexStrike MCP] 2026-11-03 11:52:14 [INFO] [38;5;46m✅ ⚡ Executing command: cmd[0m
+[🔥 HexStrike MCP] 2026-11-03 11:52:14 [WARNING] [38;5;208m⚠️ ⚠️  Command completed with errors[0m
+[🔥 HexStrike MCP] 2026-11-03 11:52:30 [INFO] [38;5;46m✅ Processing request of type CallToolRequest[0m
+[🔥 HexStrike MCP] 2026-11-03 11:52:30 [INFO] [38;5;46m✅ ⚡ Executing command: C:\Windows\System32\cmd.exe[0m
+[🔥 HexStrike MCP] 2026-11-03 11:52:30 [WARNING] [38;5;208m⚠️ ⚠️  Command completed with errors[0m
+[🔥 HexStrike MCP] 2026-11-03 11:52:49 [INFO] [38;5;46m✅ Processing request of type CallToolRequest[0m
+[🔥 HexStrike MCP] 2026-11-03 11:52:49 [INFO] [38;5;46m✅ ⚡ Executing command: systeminfo[0m
+[🔥 HexStrike MCP] 2026-11-03 11:52:49 [WARNING] [38;5;208m⚠️ ⚠️  Command completed with errors[0m
+[🔥 HexStrike MCP] 2026-11-03 11:53:05 [INFO] [38;5;46m✅ Processing request of type CallToolRequest[0m
+[🔥 HexStrike MCP] 2026-11-03 11:53:05 [INFO] [38;5;46m✅ ⚡ Executing command: whoami[0m
+[🔥 HexStrike MCP] 2026-11-03 11:53:05 [INFO] [38;5;46m✅ ✅ Command completed successfully in 0.00s[0m
+[🔥 HexStrike MCP] 2026-11-03 11:54:33 [INFO] [38;5;46m✅ Processing request of type CallToolRequest[0m
+[🔥 HexStrike MCP] 2026-11-03 11:54:33 [INFO] [38;5;46m✅ ⚡ Executing command: ls /usr/bin[0m
+[🔥 HexStrike MCP] 2026-11-03 11:54:33 [INFO] [38;5;46m✅ ✅ Command completed successfully in 0.01s[0m
+[🔥 HexStrike MCP] 2026-11-03 11:55:22 [INFO] [38;5;46m✅ Processing request of type CallToolRequest[0m
+[🔥 HexStrike MCP] 2026-11-03 11:55:22 [INFO] [38;5;46m✅ ⚡ Executing command: find / -name cmd.exe 2>/dev/null[0m
+[🔥 HexStrike MCP] 2026-11-03 11:55:33 [WARNING] [38;5;208m⚠️ ⚠️  Command completed with errors[0m
+[🔥 HexStrike MCP] 2026-11-03 11:57:57 [INFO] [38;5;46m✅ 🚀 Starting HexStrike AI MCP Client v6.0[0m
+[🔥 HexStrike MCP] 2026-11-03 11:57:57 [INFO] [38;5;46m✅ 🔗 Connecting to: http://localhost:8888[0m
+[🔥 HexStrike MCP] 2026-11-03 11:57:57 [INFO] [38;5;46m✅ 🔗 Attempting to connect to HexStrike AI API at http://localhost:8888 (attempt 1/3)[0m
+[🔥 HexStrike MCP] 2026-11-03 11:57:59 [INFO] [38;5;46m✅ 🎯 Successfully connected to HexStrike AI API Server at http://localhost:8888[0m
+[🔥 HexStrike MCP] 2026-11-03 11:57:59 [INFO] [38;5;46m✅ 🏥 Server health status: healthy[0m
+[🔥 HexStrike MCP] 2026-11-03 11:57:59 [INFO] [38;5;46m✅ 📊 Server version: 6.0.0[0m
+[🔥 HexStrike MCP] 2026-11-03 11:58:00 [INFO] [38;5;46m✅ 🎯 Successfully connected to HexStrike AI API server at http://localhost:8888[0m
+[🔥 HexStrike MCP] 2026-11-03 11:58:00 [INFO] [38;5;46m✅ 🏥 Server health status: healthy[0m
+[🔥 HexStrike MCP] 2026-11-03 11:58:00 [INFO] [38;5;46m✅ 📊 Version: 6.0.0[0m
+[🔥 HexStrike MCP] 2026-11-03 11:58:00 [WARNING] [38;5;208m⚠️ ⚠️  Not all essential tools are available on the HexStrike server[0m
+[🔥 HexStrike MCP] 2026-11-03 11:58:00 [WARNING] [38;5;208m⚠️ ❌ Missing tools: aircrack-ng, aireplay-ng, airmon-ng, airodump-ng, amass...[0m
+[🔥 HexStrike MCP] 2026-11-03 11:58:00 [WARNING] [38;5;208m⚠️ Tool already exists: httpx_probe[0m
+[🔥 HexStrike MCP] 2026-11-03 11:58:00 [INFO] [38;5;46m✅ 🚀 Starting HexStrike AI MCP server[0m
+[🔥 HexStrike MCP] 2026-11-03 11:58:00 [INFO] [38;5;46m✅ 🤖 Ready to serve AI agents with enhanced cybersecurity capabilities[0m
+[🔥 HexStrike MCP] 2026-11-03 11:58:00 [INFO] [38;5;46m✅ Processing request of type ListToolsRequest[0m
+[🔥 HexStrike MCP] 2026-11-03 12:00:08 [INFO] [38;5;46m✅ 🚀 Starting HexStrike AI MCP Client v6.0[0m
+[🔥 HexStrike MCP] 2026-11-03 12:00:08 [INFO] [38;5;46m✅ 🔗 Connecting to: http://localhost:8888[0m
+[🔥 HexStrike MCP] 2026-11-03 12:00:08 [INFO] [38;5;46m✅ 🔗 Attempting to connect to HexStrike AI API at http://localhost:8888 (attempt 1/3)[0m
+[🔥 HexStrike MCP] 2026-11-03 12:00:10 [INFO] [38;5;46m✅ 🎯 Successfully connected to HexStrike AI API Server at http://localhost:8888[0m
+[🔥 HexStrike MCP] 2026-11-03 12:00:10 [INFO] [38;5;46m✅ 🏥 Server health status: healthy[0m
+[🔥 HexStrike MCP] 2026-11-03 12:00:10 [INFO] [38;5;46m✅ 📊 Server version: 6.0.0[0m
+[🔥 HexStrike MCP] 2026-11-03 12:00:11 [INFO] [38;5;46m✅ 🎯 Successfully connected to HexStrike AI API server at http://localhost:8888[0m
+[🔥 HexStrike MCP] 2026-11-03 12:00:11 [INFO] [38;5;46m✅ 🏥 Server health status: healthy[0m
+[🔥 HexStrike MCP] 2026-11-03 12:00:11 [INFO] [38;5;46m✅ 📊 Version: 6.0.0[0m
+[🔥 HexStrike MCP] 2026-11-03 12:00:11 [WARNING] [38;5;208m⚠️ ⚠️  Not all essential tools are available on the HexStrike server[0m
+[🔥 HexStrike MCP] 2026-11-03 12:00:11 [WARNING] [38;5;208m⚠️ ❌ Missing tools: aircrack-ng, aireplay-ng, airmon-ng, airodump-ng, amass...[0m
+[🔥 HexStrike MCP] 2026-11-03 12:00:11 [WARNING] [38;5;208m⚠️ Tool already exists: httpx_probe[0m
+[🔥 HexStrike MCP] 2026-11-03 12:00:12 [INFO] [38;5;46m✅ 🚀 Starting HexStrike AI MCP server[0m
+[🔥 HexStrike MCP] 2026-11-03 12:00:12 [INFO] [38;5;46m✅ 🤖 Ready to serve AI agents with enhanced cybersecurity capabilities[0m
+[🔥 HexStrike MCP] 2026-11-03 12:00:12 [INFO] [38;5;46m✅ Processing request of type ListToolsRequest[0m
+[🔥 HexStrike MCP] 2026-11-03 12:03:23 [INFO] [38;5;46m✅ 🚀 Starting HexStrike AI MCP Client v6.0[0m
+[🔥 HexStrike MCP] 2026-11-03 12:03:23 [INFO] [38;5;46m✅ 🔗 Connecting to: http://localhost:8888[0m
+[🔥 HexStrike MCP] 2026-11-03 12:03:23 [INFO] [38;5;46m✅ 🔗 Attempting to connect to HexStrike AI API at http://localhost:8888 (attempt 1/3)[0m
+[🔥 HexStrike MCP] 2026-11-03 12:03:24 [INFO] [38;5;46m✅ 🎯 Successfully connected to HexStrike AI API Server at http://localhost:8888[0m
+[🔥 HexStrike MCP] 2026-11-03 12:03:24 [INFO] [38;5;46m✅ 🏥 Server health status: healthy[0m
+[🔥 HexStrike MCP] 2026-11-03 12:03:24 [INFO] [38;5;46m✅ 📊 Server version: 6.0.0[0m
+[🔥 HexStrike MCP] 2026-11-03 12:03:25 [INFO] [38;5;46m✅ 🎯 Successfully connected to HexStrike AI API server at http://localhost:8888[0m
+[🔥 HexStrike MCP] 2026-11-03 12:03:25 [INFO] [38;5;46m✅ 🏥 Server health status: healthy[0m
+[🔥 HexStrike MCP] 2026-11-03 12:03:25 [INFO] [38;5;46m✅ 📊 Version: 6.0.0[0m
+[🔥 HexStrike MCP] 2026-11-03 12:03:25 [WARNING] [38;5;208m⚠️ ⚠️  Not all essential tools are available on the HexStrike server[0m
+[🔥 HexStrike MCP] 2026-11-03 12:03:25 [WARNING] [38;5;208m⚠️ ❌ Missing tools: aircrack-ng, aireplay-ng, airmon-ng, airodump-ng, amass...[0m
+[🔥 HexStrike MCP] 2026-11-03 12:03:26 [WARNING] [38;5;208m⚠️ Tool already exists: httpx_probe[0m
+[🔥 HexStrike MCP] 2026-11-03 12:03:26 [INFO] [38;5;46m✅ 🚀 Starting HexStrike AI MCP server[0m
+[🔥 HexStrike MCP] 2026-11-03 12:03:26 [INFO] [38;5;46m✅ 🤖 Ready to serve AI agents with enhanced cybersecurity capabilities[0m
+[🔥 HexStrike MCP] 2026-11-03 12:03:26 [INFO] [38;5;46m✅ Processing request of type ListToolsRequest[0m
+[🔥 HexStrike MCP] 2026-11-03 12:08:50 [INFO] [38;5;46m✅ 🚀 Starting HexStrike AI MCP Client v6.0[0m
+[🔥 HexStrike MCP] 2026-11-03 12:08:50 [INFO] [38;5;46m✅ 🔗 Connecting to: http://localhost:8888[0m
+[🔥 HexStrike MCP] 2026-11-03 12:08:50 [INFO] [38;5;46m✅ 🔗 Attempting to connect to HexStrike AI API at http://localhost:8888 (attempt 1/3)[0m
+[🔥 HexStrike MCP] 2026-11-03 12:08:51 [INFO] [38;5;46m✅ 🎯 Successfully connected to HexStrike AI API Server at http://localhost:8888[0m
+[🔥 HexStrike MCP] 2026-11-03 12:08:51 [INFO] [38;5;46m✅ 🏥 Server health status: healthy[0m
+[🔥 HexStrike MCP] 2026-11-03 12:08:51 [INFO] [38;5;46m✅ 📊 Server version: 6.0.0[0m
+[🔥 HexStrike MCP] 2026-11-03 12:08:52 [INFO] [38;5;46m✅ 🎯 Successfully connected to HexStrike AI API server at http://localhost:8888[0m
+[🔥 HexStrike MCP] 2026-11-03 12:08:52 [INFO] [38;5;46m✅ 🏥 Server health status: healthy[0m
+[🔥 HexStrike MCP] 2026-11-03 12:08:52 [INFO] [38;5;46m✅ 📊 Version: 6.0.0[0m
+[🔥 HexStrike MCP] 2026-11-03 12:08:52 [WARNING] [38;5;208m⚠️ ⚠️  Not all essential tools are available on the HexStrike server[0m
+[🔥 HexStrike MCP] 2026-11-03 12:08:52 [WARNING] [38;5;208m⚠️ ❌ Missing tools: aircrack-ng, aireplay-ng, airmon-ng, airodump-ng, amass...[0m
+[🔥 HexStrike MCP] 2026-11-03 12:08:53 [WARNING] [38;5;208m⚠️ Tool already exists: httpx_probe[0m
+[🔥 HexStrike MCP] 2026-11-03 12:08:53 [INFO] [38;5;46m✅ 🚀 Starting HexStrike AI MCP server[0m
+[🔥 HexStrike MCP] 2026-11-03 12:08:53 [INFO] [38;5;46m✅ 🤖 Ready to serve AI agents with enhanced cybersecurity capabilities[0m
+[🔥 HexStrike MCP] 2026-11-03 12:08:53 [INFO] [38;5;46m✅ Processing request of type ListToolsRequest[0m
+[🔥 HexStrike MCP] 2026-11-03 12:13:47 [INFO] [38;5;46m✅ 🚀 Starting HexStrike AI MCP Client v6.0[0m
+[🔥 HexStrike MCP] 2026-11-03 12:13:47 [INFO] [38;5;46m✅ 🔗 Connecting to: http://localhost:8888[0m
+[🔥 HexStrike MCP] 2026-11-03 12:13:47 [INFO] [38;5;46m✅ 🔗 Attempting to connect to HexStrike AI API at http://localhost:8888 (attempt 1/3)[0m
+[🔥 HexStrike MCP] 2026-11-03 12:13:49 [INFO] [38;5;46m✅ 🎯 Successfully connected to HexStrike AI API Server at http://localhost:8888[0m
+[🔥 HexStrike MCP] 2026-11-03 12:13:49 [INFO] [38;5;46m✅ 🏥 Server health status: healthy[0m
+[🔥 HexStrike MCP] 2026-11-03 12:13:49 [INFO] [38;5;46m✅ 📊 Server version: 6.0.0[0m
+[🔥 HexStrike MCP] 2026-11-03 12:13:50 [INFO] [38;5;46m✅ 🎯 Successfully connected to HexStrike AI API server at http://localhost:8888[0m
+[🔥 HexStrike MCP] 2026-11-03 12:13:50 [INFO] [38;5;46m✅ 🏥 Server health status: healthy[0m
+[🔥 HexStrike MCP] 2026-11-03 12:13:50 [INFO] [38;5;46m✅ 📊 Version: 6.0.0[0m
+[🔥 HexStrike MCP] 2026-11-03 12:13:50 [WARNING] [38;5;208m⚠️ ⚠️  Not all essential tools are available on the HexStrike server[0m
+[🔥 HexStrike MCP] 2026-11-03 12:13:50 [WARNING] [38;5;208m⚠️ ❌ Missing tools: aircrack-ng, aireplay-ng, airmon-ng, airodump-ng, amass...[0m
+[🔥 HexStrike MCP] 2026-11-03 12:13:50 [WARNING] [38;5;208m⚠️ Tool already exists: httpx_probe[0m
+[🔥 HexStrike MCP] 2026-11-03 12:13:50 [INFO] [38;5;46m✅ 🚀 Starting HexStrike AI MCP server[0m
+[🔥 HexStrike MCP] 2026-11-03 12:13:50 [INFO] [38;5;46m✅ 🤖 Ready to serve AI agents with enhanced cybersecurity capabilities[0m
+[🔥 HexStrike MCP] 2026-11-03 12:13:50 [INFO] [38;5;46m✅ Processing request of type ListToolsRequest[0m
+[🔥 HexStrike MCP] 2026-11-03 12:14:08 [INFO] [38;5;46m✅ Processing request of type CallToolRequest[0m
+[🔥 HexStrike MCP] 2026-11-03 12:14:08 [INFO] [38;5;46m✅ ⚡ Executing command: evil-winrm -i 10.1.1.10 -u 'ecorp\spraino' -p 'cooladmin2026'[0m
+[🔥 HexStrike MCP] 2026-11-03 12:14:08 [INFO] [38;5;46m✅ ✅ Command completed successfully in 300.00s[0m
+[🔥 HexStrike MCP] 2026-11-03 12:14:23 [INFO] [38;5;46m✅ Processing request of type CallToolRequest[0m
+[🔥 HexStrike MCP] 2026-11-03 12:14:23 [INFO] [38;5;46m✅ ⚡ Executing command: whoami[0m
+[🔥 HexStrike MCP] 2026-11-03 12:14:23 [INFO] [38;5;46m✅ ✅ Command completed successfully in 0.00s[0m
+[🔥 HexStrike MCP] 2026-11-03 12:14:36 [INFO] [38;5;46m✅ Processing request of type CallToolRequest[0m
+[🔥 HexStrike MCP] 2026-11-03 12:14:36 [INFO] [38;5;46m✅ ⚡ Executing command: net users[0m
+[🔥 HexStrike MCP] 2026-11-03 12:14:36 [WARNING] [38;5;208m⚠️ ⚠️  Command completed with errors[0m
+[🔥 HexStrike MCP] 2026-11-03 12:14:48 [INFO] [38;5;46m✅ Processing request of type CallToolRequest[0m
+[🔥 HexStrike MCP] 2026-11-03 12:14:48 [INFO] [38;5;46m✅ ⚡ Executing command: powershell.exe Get-LocalUser | Select-Object Name, Enabled[0m
+[🔥 HexStrike MCP] 2026-11-03 12:14:48 [WARNING] [38;5;208m⚠️ ⚠️  Command completed with errors[0m
+[🔥 HexStrike MCP] 2026-11-03 12:22:30 [INFO] [38;5;46m✅ 🚀 Starting HexStrike AI MCP Client v6.0[0m
+[🔥 HexStrike MCP] 2026-11-03 12:22:30 [INFO] [38;5;46m✅ 🔗 Connecting to: http://localhost:8888[0m
+[🔥 HexStrike MCP] 2026-11-03 12:22:30 [INFO] [38;5;46m✅ 🔗 Attempting to connect to HexStrike AI API at http://localhost:8888 (attempt 1/3)[0m
+[🔥 HexStrike MCP] 2026-11-03 12:22:31 [INFO] [38;5;46m✅ 🎯 Successfully connected to HexStrike AI API Server at http://localhost:8888[0m
+[🔥 HexStrike MCP] 2026-11-03 12:22:31 [INFO] [38;5;46m✅ 🏥 Server health status: healthy[0m
+[🔥 HexStrike MCP] 2026-11-03 12:22:31 [INFO] [38;5;46m✅ 📊 Server version: 6.0.0[0m
+[🔥 HexStrike MCP] 2026-11-03 12:22:33 [INFO] [38;5;46m✅ 🎯 Successfully connected to HexStrike AI API server at http://localhost:8888[0m
+[🔥 HexStrike MCP] 2026-11-03 12:22:33 [INFO] [38;5;46m✅ 🏥 Server health status: healthy[0m
+[🔥 HexStrike MCP] 2026-11-03 12:22:33 [INFO] [38;5;46m✅ 📊 Version: 6.0.0[0m
+[🔥 HexStrike MCP] 2026-11-03 12:22:33 [WARNING] [38;5;208m⚠️ ⚠️  Not all essential tools are available on the HexStrike server[0m
+[🔥 HexStrike MCP] 2026-11-03 12:22:33 [WARNING] [38;5;208m⚠️ ❌ Missing tools: aircrack-ng, aireplay-ng, airmon-ng, airodump-ng, amass...[0m
+[🔥 HexStrike MCP] 2026-11-03 12:22:33 [WARNING] [38;5;208m⚠️ Tool already exists: httpx_probe[0m
+[🔥 HexStrike MCP] 2026-11-03 12:22:33 [INFO] [38;5;46m✅ 🚀 Starting HexStrike AI MCP server[0m
+[🔥 HexStrike MCP] 2026-11-03 12:22:33 [INFO] [38;5;46m✅ 🤖 Ready to serve AI agents with enhanced cybersecurity capabilities[0m
+[🔥 HexStrike MCP] 2026-11-03 12:22:33 [INFO] [38;5;46m✅ Processing request of type ListToolsRequest[0m
+[🔥 HexStrike MCP] 2026-11-03 12:22:38 [INFO] [38;5;46m✅ Processing request of type CallToolRequest[0m
+[🔥 HexStrike MCP] 2026-11-03 12:22:38 [INFO] [38;5;46m✅ ⚡ Executing command: evil-winrm -i 10.1.1.10 -u 'ecorp\spraino' -p 'cooladmin2026'[0m
+[🔥 HexStrike MCP] 2026-11-03 12:27:38 [INFO] [38;5;46m✅ ✅ Command completed successfully in 300.00s[0m
+[🔥 HexStrike MCP] 2026-11-03 12:41:10 [INFO] [38;5;46m✅ 🚀 Starting HexStrike AI MCP Client v6.0[0m
+[🔥 HexStrike MCP] 2026-11-03 12:41:10 [INFO] [38;5;46m✅ 🔗 Connecting to: http://localhost:8888[0m
+[🔥 HexStrike MCP] 2026-11-03 12:41:10 [INFO] [38;5;46m✅ 🔗 Attempting to connect to HexStrike AI API at http://localhost:8888 (attempt 1/3)[0m
+[🔥 HexStrike MCP] 2026-11-03 12:41:12 [INFO] [38;5;46m✅ 🎯 Successfully connected to HexStrike AI API Server at http://localhost:8888[0m
+[🔥 HexStrike MCP] 2026-11-03 12:41:12 [INFO] [38;5;46m✅ 🏥 Server health status: healthy[0m
+[🔥 HexStrike MCP] 2026-11-03 12:41:12 [INFO] [38;5;46m✅ 📊 Server version: 6.0.0[0m
+[🔥 HexStrike MCP] 2026-11-03 12:41:13 [INFO] [38;5;46m✅ 🎯 Successfully connected to HexStrike AI API server at http://localhost:8888[0m
+[🔥 HexStrike MCP] 2026-11-03 12:41:13 [INFO] [38;5;46m✅ 🏥 Server health status: healthy[0m
+[🔥 HexStrike MCP] 2026-11-03 12:41:13 [INFO] [38;5;46m✅ 📊 Version: 6.0.0[0m
+[🔥 HexStrike MCP] 2026-11-03 12:41:13 [WARNING] [38;5;208m⚠️ ⚠️  Not all essential tools are available on the HexStrike server[0m
+[🔥 HexStrike MCP] 2026-11-03 12:41:13 [WARNING] [38;5;208m⚠️ ❌ Missing tools: aircrack-ng, aireplay-ng, airmon-ng, airodump-ng, amass...[0m
+[🔥 HexStrike MCP] 2026-11-03 12:41:13 [WARNING] [38;5;208m⚠️ Tool already exists: httpx_probe[0m
+[🔥 HexStrike MCP] 2026-11-03 12:41:13 [INFO] [38;5;46m✅ 🚀 Starting HexStrike AI MCP server[0m
+[🔥 HexStrike MCP] 2026-11-03 12:41:13 [INFO] [38;5;46m✅ 🤖 Ready to serve AI agents with enhanced cybersecurity capabilities[0m
+[🔥 HexStrike MCP] 2026-11-03 12:41:13 [INFO] [38;5;46m✅ Processing request of type ListToolsRequest[0m
+[🔥 HexStrike MCP] 2026-11-03 12:43:05 [INFO] [38;5;46m✅ 🚀 Starting HexStrike AI MCP Client v6.0[0m
+[🔥 HexStrike MCP] 2026-11-03 12:43:05 [INFO] [38;5;46m✅ 🔗 Connecting to: http://localhost:8888[0m
+[🔥 HexStrike MCP] 2026-11-03 12:43:05 [INFO] [38;5;46m✅ 🔗 Attempting to connect to HexStrike AI API at http://localhost:8888 (attempt 1/3)[0m
+[🔥 HexStrike MCP] 2026-11-03 12:43:07 [INFO] [38;5;46m✅ 🎯 Successfully connected to HexStrike AI API Server at http://localhost:8888[0m
+[🔥 HexStrike MCP] 2026-11-03 12:43:07 [INFO] [38;5;46m✅ 🏥 Server health status: healthy[0m
+[🔥 HexStrike MCP] 2026-11-03 12:43:07 [INFO] [38;5;46m✅ 📊 Server version: 6.0.0[0m
+[🔥 HexStrike MCP] 2026-11-03 12:43:08 [INFO] [38;5;46m✅ 🎯 Successfully connected to HexStrike AI API server at http://localhost:8888[0m
+[🔥 HexStrike MCP] 2026-11-03 12:43:08 [INFO] [38;5;46m✅ 🏥 Server health status: healthy[0m
+[🔥 HexStrike MCP] 2026-11-03 12:43:08 [INFO] [38;5;46m✅ 📊 Version: 6.0.0[0m
+[🔥 HexStrike MCP] 2026-11-03 12:43:08 [WARNING] [38;5;208m⚠️ ⚠️  Not all essential tools are available on the HexStrike server[0m
+[🔥 HexStrike MCP] 2026-11-03 12:43:08 [WARNING] [38;5;208m⚠️ ❌ Missing tools: aircrack-ng, aireplay-ng, airmon-ng, airodump-ng, amass...[0m
+[🔥 HexStrike MCP] 2026-11-03 12:43:08 [WARNING] [38;5;208m⚠️ Tool already exists: httpx_probe[0m
+[🔥 HexStrike MCP] 2026-11-03 12:43:08 [INFO] [38;5;46m✅ 🚀 Starting HexStrike AI MCP server[0m
+[🔥 HexStrike MCP] 2026-11-03 12:43:08 [INFO] [38;5;46m✅ 🤖 Ready to serve AI agents with enhanced cybersecurity capabilities[0m
+[🔥 HexStrike MCP] 2026-11-03 12:43:08 [INFO] [38;5;46m✅ Processing request of type ListToolsRequest[0m
+[🔥 HexStrike MCP] 2026-11-03 12:53:45 [INFO] [38;5;46m✅ 🚀 Starting HexStrike AI MCP Client v6.0[0m
+[🔥 HexStrike MCP] 2026-11-03 12:53:45 [INFO] [38;5;46m✅ 🔗 Connecting to: http://localhost:8888[0m
+[🔥 HexStrike MCP] 2026-11-03 12:53:45 [INFO] [38;5;46m✅ 🔗 Attempting to connect to HexStrike AI API at http://localhost:8888 (attempt 1/3)[0m
+[🔥 HexStrike MCP] 2026-11-03 12:53:47 [INFO] [38;5;46m✅ 🎯 Successfully connected to HexStrike AI API Server at http://localhost:8888[0m
+[🔥 HexStrike MCP] 2026-11-03 12:53:47 [INFO] [38;5;46m✅ 🏥 Server health status: healthy[0m
+[🔥 HexStrike MCP] 2026-11-03 12:53:47 [INFO] [38;5;46m✅ 📊 Server version: 6.0.0[0m
+[🔥 HexStrike MCP] 2026-11-03 12:53:48 [INFO] [38;5;46m✅ 🎯 Successfully connected to HexStrike AI API server at http://localhost:8888[0m
+[🔥 HexStrike MCP] 2026-11-03 12:53:48 [INFO] [38;5;46m✅ 🏥 Server health status: healthy[0m
+[🔥 HexStrike MCP] 2026-11-03 12:53:48 [INFO] [38;5;46m✅ 📊 Version: 6.0.0[0m
+[🔥 HexStrike MCP] 2026-11-03 12:53:48 [WARNING] [38;5;208m⚠️ ⚠️  Not all essential tools are available on the HexStrike server[0m
+[🔥 HexStrike MCP] 2026-11-03 12:53:48 [WARNING] [38;5;208m⚠️ ❌ Missing tools: aircrack-ng, aireplay-ng, airmon-ng, airodump-ng, amass...[0m
+[🔥 HexStrike MCP] 2026-11-03 12:53:48 [WARNING] [38;5;208m⚠️ Tool already exists: httpx_probe[0m
+[🔥 HexStrike MCP] 2026-11-03 12:53:48 [INFO] [38;5;46m✅ 🚀 Starting HexStrike AI MCP server[0m
+[🔥 HexStrike MCP] 2026-11-03 12:53:48 [INFO] [38;5;46m✅ 🤖 Ready to serve AI agents with enhanced cybersecurity capabilities[0m
+[🔥 HexStrike MCP] 2026-11-03 12:53:48 [INFO] [38;5;46m✅ Processing request of type ListToolsRequest[0m
+[🔥 HexStrike MCP] 2026-11-03 13:49:22 [INFO] [38;5;46m✅ 🚀 Starting HexStrike AI MCP Client v6.0[0m
+[🔥 HexStrike MCP] 2026-11-03 13:49:22 [INFO] [38;5;46m✅ 🔗 Connecting to: http://localhost:8888[0m
+[🔥 HexStrike MCP] 2026-11-03 13:49:22 [INFO] [38;5;46m✅ 🔗 Attempting to connect to HexStrike AI API at http://localhost:8888 (attempt 1/3)[0m
+[🔥 HexStrike MCP] 2026-11-03 13:49:23 [INFO] [38;5;46m✅ 🎯 Successfully connected to HexStrike AI API Server at http://localhost:8888[0m
+[🔥 HexStrike MCP] 2026-11-03 13:49:23 [INFO] [38;5;46m✅ 🏥 Server health status: healthy[0m
+[🔥 HexStrike MCP] 2026-11-03 13:49:23 [INFO] [38;5;46m✅ 📊 Server version: 6.0.0[0m
+[🔥 HexStrike MCP] 2026-11-03 13:49:25 [INFO] [38;5;46m✅ 🎯 Successfully connected to HexStrike AI API server at http://localhost:8888[0m
+[🔥 HexStrike MCP] 2026-11-03 13:49:25 [INFO] [38;5;46m✅ 🏥 Server health status: healthy[0m
+[🔥 HexStrike MCP] 2026-11-03 13:49:25 [INFO] [38;5;46m✅ 📊 Version: 6.0.0[0m
+[🔥 HexStrike MCP] 2026-11-03 13:49:25 [WARNING] [38;5;208m⚠️ ⚠️  Not all essential tools are available on the HexStrike server[0m
+[🔥 HexStrike MCP] 2026-11-03 13:49:25 [WARNING] [38;5;208m⚠️ ❌ Missing tools: aircrack-ng, aireplay-ng, airmon-ng, airodump-ng, amass...[0m
+[🔥 HexStrike MCP] 2026-11-03 13:49:25 [WARNING] [38;5;208m⚠️ Tool already exists: httpx_probe[0m
+[🔥 HexStrike MCP] 2026-11-03 13:49:25 [INFO] [38;5;46m✅ 🚀 Starting HexStrike AI MCP server[0m
+[🔥 HexStrike MCP] 2026-11-03 13:49:25 [INFO] [38;5;46m✅ 🤖 Ready to serve AI agents with enhanced cybersecurity capabilities[0m
+[🔥 HexStrike MCP] 2026-11-03 13:49:25 [INFO] [38;5;46m✅ Processing request of type ListToolsRequest[0m
+[🔥 HexStrike MCP] 2026-11-03 13:53:00 [INFO] [38;5;46m✅ 🚀 Starting HexStrike AI MCP Client v6.0[0m
+[🔥 HexStrike MCP] 2026-11-03 13:53:00 [INFO] [38;5;46m✅ 🔗 Connecting to: http://localhost:8888[0m
+[🔥 HexStrike MCP] 2026-11-03 13:53:00 [INFO] [38;5;46m✅ 🔗 Attempting to connect to HexStrike AI API at http://localhost:8888 (attempt 1/3)[0m
+[🔥 HexStrike MCP] 2026-11-03 13:53:02 [INFO] [38;5;46m✅ 🎯 Successfully connected to HexStrike AI API Server at http://localhost:8888[0m
+[🔥 HexStrike MCP] 2026-11-03 13:53:02 [INFO] [38;5;46m✅ 🏥 Server health status: healthy[0m
+[🔥 HexStrike MCP] 2026-11-03 13:53:02 [INFO] [38;5;46m✅ 📊 Server version: 6.0.0[0m
+[🔥 HexStrike MCP] 2026-11-03 13:53:03 [INFO] [38;5;46m✅ 🎯 Successfully connected to HexStrike AI API server at http://localhost:8888[0m
+[🔥 HexStrike MCP] 2026-11-03 13:53:03 [INFO] [38;5;46m✅ 🏥 Server health status: healthy[0m
+[🔥 HexStrike MCP] 2026-11-03 13:53:03 [INFO] [38;5;46m✅ 📊 Version: 6.0.0[0m
+[🔥 HexStrike MCP] 2026-11-03 13:53:03 [WARNING] [38;5;208m⚠️ ⚠️  Not all essential tools are available on the HexStrike server[0m
+[🔥 HexStrike MCP] 2026-11-03 13:53:03 [WARNING] [38;5;208m⚠️ ❌ Missing tools: aircrack-ng, aireplay-ng, airmon-ng, airodump-ng, amass...[0m
+[🔥 HexStrike MCP] 2026-11-03 13:53:03 [WARNING] [38;5;208m⚠️ Tool already exists: httpx_probe[0m
+[🔥 HexStrike MCP] 2026-11-03 13:53:03 [INFO] [38;5;46m✅ 🚀 Starting HexStrike AI MCP server[0m
+[🔥 HexStrike MCP] 2026-11-03 13:53:03 [INFO] [38;5;46m✅ 🤖 Ready to serve AI agents with enhanced cybersecurity capabilities[0m
+[🔥 HexStrike MCP] 2026-11-03 13:53:03 [INFO] [38;5;46m✅ Processing request of type ListToolsRequest[0m
+[🔥 HexStrike MCP] 2026-11-03 13:55:02 [INFO] [38;5;46m✅ 🚀 Starting HexStrike AI MCP Client v6.0[0m
+[🔥 HexStrike MCP] 2026-11-03 13:55:02 [INFO] [38;5;46m✅ 🔗 Connecting to: http://localhost:8888[0m
+[🔥 HexStrike MCP] 2026-11-03 13:55:02 [INFO] [38;5;46m✅ 🔗 Attempting to connect to HexStrike AI API at http://localhost:8888 (attempt 1/3)[0m
+[🔥 HexStrike MCP] 2026-11-03 13:55:04 [INFO] [38;5;46m✅ 🎯 Successfully connected to HexStrike AI API Server at http://localhost:8888[0m
+[🔥 HexStrike MCP] 2026-11-03 13:55:04 [INFO] [38;5;46m✅ 🏥 Server health status: healthy[0m
+[🔥 HexStrike MCP] 2026-11-03 13:55:04 [INFO] [38;5;46m✅ 📊 Server version: 6.0.0[0m
+[🔥 HexStrike MCP] 2026-11-03 13:55:05 [INFO] [38;5;46m✅ 🎯 Successfully connected to HexStrike AI API server at http://localhost:8888[0m
+[🔥 HexStrike MCP] 2026-11-03 13:55:05 [INFO] [38;5;46m✅ 🏥 Server health status: healthy[0m
+[🔥 HexStrike MCP] 2026-11-03 13:55:05 [INFO] [38;5;46m✅ 📊 Version: 6.0.0[0m
+[🔥 HexStrike MCP] 2026-11-03 13:55:05 [WARNING] [38;5;208m⚠️ ⚠️  Not all essential tools are available on the HexStrike server[0m
+[🔥 HexStrike MCP] 2026-11-03 13:55:05 [WARNING] [38;5;208m⚠️ ❌ Missing tools: aircrack-ng, aireplay-ng, airmon-ng, airodump-ng, amass...[0m
+[🔥 HexStrike MCP] 2026-11-03 13:55:05 [WARNING] [38;5;208m⚠️ Tool already exists: httpx_probe[0m
+[🔥 HexStrike MCP] 2026-11-03 13:55:05 [INFO] [38;5;46m✅ 🚀 Starting HexStrike AI MCP server[0m
+[🔥 HexStrike MCP] 2026-11-03 13:55:05 [INFO] [38;5;46m✅ 🤖 Ready to serve AI agents with enhanced cybersecurity capabilities[0m
+[🔥 HexStrike MCP] 2026-11-03 13:55:05 [INFO] [38;5;46m✅ Processing request of type ListToolsRequest[0m
+[🔥 HexStrike MCP] 2026-11-03 13:56:15 [INFO] [38;5;46m✅ 🚀 Starting HexStrike AI MCP Client v6.0[0m
+[🔥 HexStrike MCP] 2026-11-03 13:56:15 [INFO] [38;5;46m✅ 🔗 Connecting to: http://localhost:8888[0m
+[🔥 HexStrike MCP] 2026-11-03 13:56:15 [INFO] [38;5;46m✅ 🔗 Attempting to connect to HexStrike AI API at http://localhost:8888 (attempt 1/3)[0m
+[🔥 HexStrike MCP] 2026-11-03 13:56:16 [INFO] [38;5;46m✅ 🎯 Successfully connected to HexStrike AI API Server at http://localhost:8888[0m
+[🔥 HexStrike MCP] 2026-11-03 13:56:16 [INFO] [38;5;46m✅ 🏥 Server health status: healthy[0m
+[🔥 HexStrike MCP] 2026-11-03 13:56:16 [INFO] [38;5;46m✅ 📊 Server version: 6.0.0[0m
+[🔥 HexStrike MCP] 2026-11-03 13:56:18 [INFO] [38;5;46m✅ 🎯 Successfully connected to HexStrike AI API server at http://localhost:8888[0m
+[🔥 HexStrike MCP] 2026-11-03 13:56:18 [INFO] [38;5;46m✅ 🏥 Server health status: healthy[0m
+[🔥 HexStrike MCP] 2026-11-03 13:56:18 [INFO] [38;5;46m✅ 📊 Version: 6.0.0[0m
+[🔥 HexStrike MCP] 2026-11-03 13:56:18 [WARNING] [38;5;208m⚠️ ⚠️  Not all essential tools are available on the HexStrike server[0m
+[🔥 HexStrike MCP] 2026-11-03 13:56:18 [WARNING] [38;5;208m⚠️ ❌ Missing tools: aircrack-ng, aireplay-ng, airmon-ng, airodump-ng, amass...[0m
+[🔥 HexStrike MCP] 2026-11-03 13:56:18 [WARNING] [38;5;208m⚠️ Tool already exists: httpx_probe[0m
+[🔥 HexStrike MCP] 2026-11-03 13:56:18 [INFO] [38;5;46m✅ 🚀 Starting HexStrike AI MCP server[0m
+[🔥 HexStrike MCP] 2026-11-03 13:56:18 [INFO] [38;5;46m✅ 🤖 Ready to serve AI agents with enhanced cybersecurity capabilities[0m
+[🔥 HexStrike MCP] 2026-11-03 13:56:18 [INFO] [38;5;46m✅ Processing request of type ListToolsRequest[0m

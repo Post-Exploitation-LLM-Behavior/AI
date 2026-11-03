@@ -1,14 +1,9 @@
 {
   "mcpServers": {
-    "hexstrike": {
-      "command": "python3",
-      "args": [
-        "hexstrike_mcp_server.py",
-        "--host", "0.0.0.0",
-        "--port", "8889",
-        "--api-url", "http://localhost:8888"
-      ],
-      "env": {}
+    "winrm": {
+      "command": "hexstrike-ai/venv/bin/python3",
+      "args": ["winrm_mcp.py"],
+      "env": {"PYTHONNOUSERSITE":"1","WINRM_HOST":"<ip>","WINRM_USER":"ecorp\\administrator","WINRM_PASS":"<pass>"}
     }
   }
 }
