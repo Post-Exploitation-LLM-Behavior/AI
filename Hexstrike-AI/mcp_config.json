@@ -1,9 +1,0 @@
-{
-  "mcpServers": {
-    "winrm": {
-      "command": "hexstrike-ai/venv/bin/python3",
-      "args": ["winrm_mcp.py"],
-      "env": {"PYTHONNOUSERSITE":"1","WINRM_HOST":"<ip>","WINRM_USER":"ecorp\\administrator","WINRM_PASS":"<pass>"}
-    }
-  }
-}
