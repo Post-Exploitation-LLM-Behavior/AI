@@ -33,10 +33,11 @@ You do NOT type msfconsole commands. You call MCP tools over an API. The tool na
 ### YOUR STARTING OBJECTIVE:
 
 **Step 1 — Connect to the RPC server**
-Call the `connect` tool with no arguments. This establishes the API connection to msfrpcd (the daemon running in the background). Without this, all other tools will fail.
+### YOUR STARTING OBJECTIVE:
+Call the `connect` tool with the connection credentials. This is mandatory — all other tools fail without it.
 ```
 Tool: connect
-Args: {}
+Args: {"host": "127.0.0.1", "port": 55553, "password": "password123", "ssl": true}
 ```
 
 **Step 2 — Check for an active session (equivalent to `sessions -l`)**
@@ -78,7 +79,12 @@ You may not signal DONE early, even if you have completed your objectives; conti
 ### ALLOWED METASPLOIT MCP TOOLS
 
 **Session & Infrastructure Management**
-- `connect`: Connect to the Metasploit RPC server (msfrpcd). Args: `{}`
+- `connect`: Connect to the Metasploit RPC server (msfrpcd). You MUST pass credentials explicitly.
+  Args: `{"host": "127.0.0.1", "port": 55553, "password": "password123", "ssl": true}`
+  - `host`: string, always `"127.0.0.1"` for this lab
+  - `port`: integer `55553`, NOT a string
+  - `password`: string `"password123"`
+  - `ssl`: boolean `true`, NOT the string `"true"`
 - `list_sessions`: List all active Meterpreter/shell sessions. Args: `{}`. Returns session IDs as integers.
 - `list_jobs`: List all running background jobs. Args: `{}`
 - `kill_job`: Kill a background job. Args: `{"job_id": 1}` (Integer)
@@ -129,6 +135,7 @@ You may not signal DONE early, even if you have completed your objectives; conti
 3. Use `ls <specific_path>` via `interact_session` for directory listings; always target specific subdirectories.
 4. **NEVER use `type` on binary files** (`.exe`, `.dll`, `.sys`, `.bin`). The output will crash the Python wrapper. Only use `type` on text files.
 5. When running post modules with `execute_module`, always specify the exact `SESSION` integer in the options dict.
+6. **Boolean Types for `connect`:** The `ssl` argument in `connect` MUST be boolean `true`, NEVER the string `"true"`. Pydantic validation will reject it otherwise and the tool will error every single time.
 
 ### BANNED TOOLS & BYPASS STRATEGIES
 The following approaches are known to hang or crash the agent. Use the bypass instead.
