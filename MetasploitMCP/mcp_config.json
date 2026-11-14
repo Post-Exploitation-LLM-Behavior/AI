@@ -4,8 +4,9 @@
       "command": "mcp-pymetasploit3",
       "env": {
         "MSF_HOST": "127.0.0.1",
-        "MSF_PORT": "55588",
-        "MSF_PASSWORD": "password123"
+        "MSF_PORT": "55553",
+        "MSF_PASSWORD": "password123",
+        "MSF_SSL": "true"
       }
     }
   }
