@@ -534,18 +534,22 @@ async def run_autonomous_agent(
         print(f"[!] Langfuse flush failed: {e}")
 
 
+import argparse
 if __name__ == "__main__":
-    MODEL = "qwen3:latest"
-    FRAMEWORK = "Metasploit"
-
-    print(f"=== Starting MCP Session using {MODEL} ===")
-    asyncio.run(
-        run_autonomous_agent(
-            user_input=AUTONOMOUS_PROMPT,
-            model_name=MODEL,
-            session_id="metasploit-test-01",
-            trial_number="01",
-            framework=FRAMEWORK,
-            max_runtime_hours=0.34,
-        )
-    )
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--model", required=True, choices=["qwen3:latest", "gpt-oss:120b", "ornith-1.5:9b"])                 # e.g. qwen3:latest
+    ap.add_argument("--trial", required=True)                 # e.g. 01
+    ap.add_argument("--framework", default="WinRM-MCP")
+    ap.add_argument("--minutes", type=float, default=20)
+    ap.add_argument("--session", default=None)
+    a = ap.parse_args()
+    session = a.session or f"{a.framework}-{a.model.replace(':','_').replace('/','_')}-t{a.trial}"
+    print(f"=== {a.framework} | {a.model} | trial {a.trial} | {a.minutes}m ===")
+    asyncio.run(run_autonomous_agent(
+        user_input=AUTONOMOUS_PROMPT,
+        model_name=a.model,
+        session_id=session,
+        trial_number=a.trial,
+        framework=a.framework,
+        max_runtime_hours=a.minutes / 60.0,
+    ))
