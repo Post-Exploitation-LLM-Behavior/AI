@@ -14,7 +14,7 @@ Do not call anything else until connect succeeds.
 
 **STEP 2 — Run the exploit handler to establish a session**
 There is NO active session yet. You MUST create one. The target machine ADM-01 (10.1.1.10) has a Meterpreter bind_tcp payload already running on port 4444, but nothing is connected to it yet. You need to start a handler that reaches out and connects to that payload.
-This must be done with these EXACT args:
+Do not change the command to connect to the session. Do not stray from the EXACT command. Do not include options. This must be done with these EXACT args:
 {
   tool: "execute_module"
   args: {
