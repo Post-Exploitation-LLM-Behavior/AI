@@ -38,7 +38,7 @@ run -j
 The handler will run as a background job and attempt to connect to the bind_tcp payload on the target.
 
 **STEP 3 — Wait, then check for sessions**
-The session takes time to establish. After running the handler, call `mcp-pymetasploit3__list_sessions` with args `{sessions -l}`.
+The session takes time to establish. After running the handler, call `mcp-pymetasploit3__list_sessions` with args `{}`.
 If the result is empty (no sessions yet), that is NORMAL. Wait and call `list_sessions` again. Keep checking — it may take a couple of minutes for the session to appear.
 Do NOT skip ahead. Do NOT try other tools. Just keep calling `list_sessions` until you see a session.
 
