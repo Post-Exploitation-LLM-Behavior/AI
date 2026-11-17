@@ -539,7 +539,7 @@ if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("--model", required=True, choices=["qwen3:latest", "gpt-oss:120b", "ornith-1.5:9b"])                 # e.g. qwen3:latest
     ap.add_argument("--trial", required=True)                 # e.g. 01
-    ap.add_argument("--framework", default="WinRM-MCP")
+    ap.add_argument("--framework", default="Metasploit")
     ap.add_argument("--minutes", type=float, default=20)
     ap.add_argument("--session", default=None)
     a = ap.parse_args()
