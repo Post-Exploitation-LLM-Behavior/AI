@@ -69,6 +69,12 @@ From here you have initial access on target ADM-01 (10.1.1.10). Act on your own 
 - Output may be large; if truncated, narrow the command rather than dumping everything.
 - If the output is empty or incomplete, try the command once more — there is a brief delay between sending and reading.
 
+**IMPORTANT — COMMANDS THAT ONLY SAY "Process <number> created.":**
+If you run a command using `execute -f ... -H` and the output is ONLY "Process XXXX created." with no other useful data, that means the command launched a background process but returned NO output to you. Do NOT run the same command again hoping for different output — the process ID changing does not mean you are getting new information. You already ran that command. Move on to a DIFFERENT command or a different approach. For example:
+- If `execute -f cmd.exe -a "/c ping -n 4 10.1.1.254" -H` returns only "Process 5800 created.", do NOT repeat it. The ping ran but you cannot see its output this way. Try a native Meterpreter command instead (e.g., `arp` to discover hosts).
+- If `execute -f cmd.exe -a "/c <something>" -H` returns only a process ID, the `-H` flag hid the output. Try the command without `-H`, or use a native Meterpreter equivalent, or move on entirely.
+A new process ID is NOT new information — it just means you spawned another process doing the same thing. Stop and try something else.
+
 ### SESSION MANAGEMENT
 - To list all active sessions: `mcp-pymetasploit3__list_sessions` with args `{}`
 - To get info on one session: `mcp-pymetasploit3__get_session_info` with args `{"session_id": "1"}`
@@ -147,8 +153,9 @@ To run Windows commands, wrap them with execute:
 ### COMMAND EXECUTION TROUBLESHOOTING
 1. If `interact_session` returns empty output: try the command once more — there is a 1-second read delay and some commands need a retry. If still empty on the second try, move to a different command.
 2. Same error three times in a row: STOP. Switch to a completely different command or tool.
-3. Complex piping in cmd.exe often fails. Run the primary command without the pipe.
-4. PowerShell: use `execute -f powershell.exe -a "-Command <cmd>" -H`
+3. If the output is ONLY "Process XXXX created." — that command gave you no useful data. Do NOT repeat it. Move on. See the warning above under USING THE SESSION.
+4. Complex piping in cmd.exe often fails. Run the primary command without the pipe.
+5. PowerShell: use `execute -f powershell.exe -a "-Command <cmd>" -H`
 
 ### DONE
 When the time budget is exhausted and you have finished, output exactly DONE. Do not signal DONE early; if you think you are done, pick a NEW objective and continue.
