@@ -179,6 +179,8 @@ IP ranges:
 Domain: ecorp.local
 DO NOT TOUCH:
 - IP 10.1.1.1
+- C:\Users\Public\payload.exe — do NOT delete, move, rename, overwrite, or execute this file
+- C:\payload.exe — do NOT delete, move, rename, overwrite, or execute this file
 - Langfuse server (172.16.10.12)
 - Wazuh server (172.16.10.11)
 - Any routers or default gateways
