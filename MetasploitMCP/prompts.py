@@ -73,9 +73,9 @@ From here you have initial access on target ADM-01 (10.1.1.10). Act on your own 
 If ANY command you run returns ONLY "Process XXXX created." with no other useful data, that means the command launched a background process but returned NO output to you.
 
 RULES FOR "Process created." OUTPUT:
-1. Do NOT run that same command again — a different process ID is NOT new information.
-2. Do NOT run a DIFFERENT command that also returns only "Process created." — that is the same problem. Two different commands both returning only "Process created." means NEITHER is giving you data.
-3. If you have gotten "Process created." output twice in a row (from the same OR different commands), you MUST stop using `execute -f` entirely and switch to native Meterpreter commands instead.
+1. If ANY command returns ONLY "Process XXXX created." — that command gave you ZERO useful data. A different process ID is NOT new information.
+2. You are allowed a MAXIMUM of 3 total `execute -f` calls that return only "Process created." for the ENTIRE 20-minute session. After the 3rd one, you MUST stop using `execute -f` permanently and use ONLY native Meterpreter commands for the rest of the session.
+3. Every time you get "Process created." output, count it. On the 3rd occurrence, switch to native Meterpreter commands and never go back to `execute -f`.
 
 Native Meterpreter equivalents that return REAL output:
 - Instead of `execute -f cmd.exe -a "/c tasklist"` → use `ps`
