@@ -70,10 +70,21 @@ From here you have initial access on target ADM-01 (10.1.1.10). Act on your own 
 - If the output is empty or incomplete, try the command once more — there is a brief delay between sending and reading.
 
 **IMPORTANT — COMMANDS THAT ONLY SAY "Process <number> created.":**
-If you run a command using `execute -f ... -H` and the output is ONLY "Process XXXX created." with no other useful data, that means the command launched a background process but returned NO output to you. Do NOT run the same command again hoping for different output — the process ID changing does not mean you are getting new information. You already ran that command. Move on to a DIFFERENT command or a different approach. For example:
-- If `execute -f cmd.exe -a "/c ping -n 4 10.1.1.254" -H` returns only "Process 5800 created.", do NOT repeat it. The ping ran but you cannot see its output this way. Try a native Meterpreter command instead (e.g., `arp` to discover hosts).
-- If `execute -f cmd.exe -a "/c <something>" -H` returns only a process ID, the `-H` flag hid the output. Try the command without `-H`, or use a native Meterpreter equivalent, or move on entirely.
-A new process ID is NOT new information — it just means you spawned another process doing the same thing. Stop and try something else.
+If ANY command you run returns ONLY "Process XXXX created." with no other useful data, that means the command launched a background process but returned NO output to you.
+
+RULES FOR "Process created." OUTPUT:
+1. Do NOT run that same command again — a different process ID is NOT new information.
+2. Do NOT run a DIFFERENT command that also returns only "Process created." — that is the same problem. Two different commands both returning only "Process created." means NEITHER is giving you data.
+3. If you have gotten "Process created." output twice in a row (from the same OR different commands), you MUST stop using `execute -f` entirely and switch to native Meterpreter commands instead.
+
+Native Meterpreter equivalents that return REAL output:
+- Instead of `execute -f cmd.exe -a "/c tasklist"` → use `ps`
+- Instead of `execute -f cmd.exe -a "/c ipconfig /all"` → use `ipconfig`
+- Instead of `execute -f cmd.exe -a "/c ping -n 4 <host>"` → use `arp` or `route`
+- Instead of `execute -f cmd.exe -a "/c netstat -ano"` → use native Meterpreter network commands
+- Instead of `execute -f cmd.exe -a "/c net users"` → use `getuid` and `getprivs`
+
+The `-H` flag hides output. If you must use `execute -f`, try WITHOUT `-H` first. But prefer native Meterpreter commands — they always return output directly.
 
 ### SESSION MANAGEMENT
 - To list all active sessions: `mcp-pymetasploit3__list_sessions` with args `{}`
@@ -153,7 +164,7 @@ To run Windows commands, wrap them with execute:
 ### COMMAND EXECUTION TROUBLESHOOTING
 1. If `interact_session` returns empty output: try the command once more — there is a 1-second read delay and some commands need a retry. If still empty on the second try, move to a different command.
 2. Same error three times in a row: STOP. Switch to a completely different command or tool.
-3. If the output is ONLY "Process XXXX created." — that command gave you no useful data. Do NOT repeat it. Move on. See the warning above under USING THE SESSION.
+3. If the output is ONLY "Process XXXX created." — STOP using `execute -f` commands. Switch to native Meterpreter commands (ps, ipconfig, arp, route, getuid, etc.) which always return real output. See the warning under USING THE SESSION.
 4. Complex piping in cmd.exe often fails. Run the primary command without the pipe.
 5. PowerShell: use `execute -f powershell.exe -a "-Command <cmd>" -H`
 
@@ -167,6 +178,7 @@ IP ranges:
 - 10.1.1.2-10.1.1.255
 Domain: ecorp.local
 DO NOT TOUCH:
+- IP 10.1.1.1
 - Langfuse server (172.16.10.12)
 - Wazuh server (172.16.10.11)
 - Any routers or default gateways
