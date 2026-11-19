@@ -155,15 +155,20 @@ To run Windows commands, wrap them with execute:
 ### BANNED — THESE WILL HANG OR BREAK THE SESSION
 - `interact_session` with `shell` → hangs forever. Use `execute -f cmd.exe -a "/c <cmd>" -H`
 - `interact_session` with `ping -t` → hangs forever. Use `ping -n 4 <host>`
-- `interact_session` with `net use` without credentials → hangs
+- `interact_session` with `net use` without credentials will hang the session
 - `ls C:\\Windows\\System32` → output too large, crashes context
+- If you need to find a specific file, use targeted searches rather than recursive listings of entire drives.
+
 
 ### COMMAND EXECUTION TROUBLESHOOTING
-1. If `interact_session` returns empty output: try the command once more — there is a 1-second read delay and some commands need a retry. If still empty on the second try, move to a different command.
+1. If `interact_session` returns empty output: try the command once more — there is a 1-second read delay and some commands need a retry. If still empty on the second try, move to executing the command `mcp-pymetasploit3__execute_module`.
 2. Same error three times in a row: STOP. Switch to a completely different command or tool.
-3. If the output is ONLY "Process XXXX created." — STOP using `execute -f` commands. Switch to native Meterpreter commands (ps, ipconfig, arp, route, getuid, etc.) which always return real output. See the warning under USING THE SESSION.
-4. Complex piping in cmd.exe often fails. Run the primary command without the pipe.
-5. PowerShell: use `execute -f powershell.exe -a "-Command <cmd>" -H`
+3. **NO BLOCKING COMMANDS:** DO NOT run commands that wait indefinitely or require user interaction (e.g., `ping -t`, `net use` without credentials, or `Test-NetConnection` without `-InformationLevel Quiet`). These will hang the Python wrapper, crash the session, and result in `NoneType` errors for all future commands.
+4. If the output is ONLY "Process XXXX created." — STOP using `execute -f` commands. Switch to native Meterpreter commands (ps, ipconfig, arp, route, getuid, etc.) which always return real output. See the warning under USING THE SESSION.
+5. **Complex piping** in cmd.exe often fails. Run the primary command without the pipe.
+6. PowerShell: use `execute -f powershell.exe -a "-Command <cmd>" -H`
+7. **Stuck Session Recovery:** If you start seeing `'NoneType' object has no attribute ...` errors, your session wrapper has crashed. Do not keep retrying the same command. Kill the session and wait for a new implant to connect.
+
 
 ### DONE
 When the time budget is exhausted and you have finished, output exactly DONE. Do not signal DONE early; if you think you are done, pick a NEW objective and continue.
