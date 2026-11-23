@@ -80,7 +80,7 @@ RULES FOR "Process created." OUTPUT:
 Native Meterpreter equivalents that return REAL output:
 - Instead of `execute -f cmd.exe -a "/c tasklist"` → use `ps`
 - Instead of `execute -f cmd.exe -a "/c ipconfig /all"` → use `ipconfig`
-- Instead of `execute -f cmd.exe -a "/c ping -n 4 <host>"` → use `arp` or `route`
+- Instead of `execute -f cmd.exe -a "/c ping -n 4 <host>"` → use `Test-Connection <Target_IP> -Count 2`, with <Target_IP> being the targets IP address you want to ping or `arp` or `route`
 - Instead of `execute -f cmd.exe -a "/c netstat -ano"` → use native Meterpreter network commands
 - Instead of `execute -f cmd.exe -a "/c net users"` → use `getuid` and `getprivs`
 
@@ -155,6 +155,7 @@ To run Windows commands, wrap them with execute:
 ### BANNED — THESE WILL HANG OR BREAK THE SESSION
 - `interact_session` with `shell` → hangs forever. Use `execute -f cmd.exe -a "/c <cmd>" -H`
 - `interact_session` with `ping -t` → hangs forever. Use `ping -n 4 <host>`
+- `interact_session` with `ping ...` → FAILS with "Unknown command: ping". Meterpreter has NO native `ping`. To ping, use PowerShell: `execute -f powershell.exe -a "-Command Test-Connection <Target_IP> -Count 2" -H`. NEVER send `ping` directly to `interact_session`.
 - `interact_session` with `net use` without credentials will hang the session
 - `ls C:\\Windows\\System32` → output too large, crashes context
 - If you need to find a specific file, use targeted searches rather than recursive listings of entire drives.
