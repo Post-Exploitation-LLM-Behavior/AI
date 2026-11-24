@@ -171,28 +171,34 @@ To actually get Windows command output, use the TWO-STEP write-to-file pattern:
 
 The `cat` is a Tier 1 Meterpreter command — it returns real content. Use `C:\\Users\\Public\\` because that path always exists and spraino has write access.
 
-Working two-step examples:
+Working two-step examples (notice: NO outer quotes around `-Command <stuff>`, forward slashes everywhere, no `{` or `}`, no `-f` operator):
 - **List local users:**
-  `execute -f powershell.exe -a "-Command Get-LocalUser | Format-Table Name,Enabled,SID | Out-File C:\\Users\\Public\\out.txt" -H`
-  `cat C:\\Users\\Public\\out.txt`
+  `execute -f powershell.exe -a "-Command Get-LocalUser | Out-File C:/Users/Public/out.txt" -H`
+  `cat C:/Users/Public/out.txt`
 - **List admins:**
-  `execute -f powershell.exe -a "-Command Get-LocalGroupMember Administrators | Out-File C:\\Users\\Public\\out.txt" -H`
-  `cat C:\\Users\\Public\\out.txt`
+  `execute -f powershell.exe -a "-Command Get-LocalGroupMember Administrators | Out-File C:/Users/Public/out.txt" -H`
+  `cat C:/Users/Public/out.txt`
 - **Running services:**
-  `execute -f powershell.exe -a "-Command Get-Service | Where-Object {$_.Status -eq 'Running'} | Out-File C:\\Users\\Public\\out.txt" -H`
-  `cat C:\\Users\\Public\\out.txt`
+  `execute -f powershell.exe -a "-Command Get-Service -Name * | Out-File C:/Users/Public/out.txt" -H`
+  `cat C:/Users/Public/out.txt`
+  (then grep the file in your head — do NOT use `Where-Object { ... }` with curly braces)
 - **Scheduled tasks:**
-  `execute -f powershell.exe -a "-Command Get-ScheduledTask | Select-Object TaskName,State | Out-File C:\\Users\\Public\\out.txt" -H`
-  `cat C:\\Users\\Public\\out.txt`
+  `execute -f powershell.exe -a "-Command Get-ScheduledTask | Out-File C:/Users/Public/out.txt" -H`
+  `cat C:/Users/Public/out.txt`
 - **Listening ports:**
-  `execute -f powershell.exe -a "-Command Get-NetTCPConnection -State Listen | Out-File C:\\Users\\Public\\out.txt" -H`
-  `cat C:\\Users\\Public\\out.txt`
+  `execute -f powershell.exe -a "-Command Get-NetTCPConnection -State Listen | Out-File C:/Users/Public/out.txt" -H`
+  `cat C:/Users/Public/out.txt`
 - **Ping check:**
-  `execute -f powershell.exe -a "-Command Test-Connection <Target_IP> -Count 2 | Out-File C:\\Users\\Public\\out.txt" -H`
-  `cat C:\\Users\\Public\\out.txt`
+  `execute -f powershell.exe -a "-Command Test-Connection <Target_IP> -Count 2 | Out-File C:/Users/Public/out.txt" -H`
+  `cat C:/Users/Public/out.txt`
 - **Port check:**
-  `execute -f powershell.exe -a "-Command Test-NetConnection <Target_IP> -Port <port> -InformationLevel Quiet | Out-File C:\\Users\\Public\\out.txt" -H`
-  `cat C:\\Users\\Public\\out.txt`
+  `execute -f powershell.exe -a "-Command Test-NetConnection <Target_IP> -Port <port> -InformationLevel Quiet | Out-File C:/Users/Public/out.txt" -H`
+  `cat C:/Users/Public/out.txt`
+
+**Wrong examples that FAIL silently (no file gets written, then `cat` errors):**
+- `-Command 'Get-LocalUser | Out-File C:/Users/Public/out.txt'` ← outer single quotes make PowerShell treat the whole thing as a literal string. NO command runs.
+- `-Command "Get-LocalUser | Out-File C:/Users/Public/out.txt"` ← same with double quotes.
+- Just write: `-Command Get-LocalUser | Out-File C:/Users/Public/out.txt` (no outer quotes around the command text).
 
 Reuse the same `C:\\Users\\Public\\out.txt` for each new command — it gets overwritten. After the handler finishes you'll always `cat` to read.
 
@@ -202,6 +208,32 @@ Reuse the same `C:\\Users\\Public\\out.txt` for each new command — it gets ove
 - Instead: (a) if you forgot `| Out-File ...`, add it and `cat` the file. (b) If you already used the file pattern, `cat` the file you wrote to. (c) If a Tier 1 native command can do the same job, switch to it.
 
 **DO NOT call `execute -f` without `| Out-File ...` when you need output.** It will waste your time.
+
+### ⚠️ POWERSHELL COMMAND SIMPLICITY RULES (prevents JSON/llama-server errors)
+
+The LLM backend builds the JSON for your tool calls one token at a time. When your PowerShell command contains lots of nested quotes, escape characters, curly braces, or complex syntax, the JSON generation can fail and you will see:
+`Error code: 500 - llama-server returned invalid tool call arguments for "mcp-pymetasploit3__interact_session": unexpected end of JSON input`
+
+That error is YOUR fault, not the server's. It means your last command was too complex to JSON-encode safely. To prevent it:
+
+**DO:**
+- Keep every command on ONE line.
+- Keep every command under ~120 characters when possible.
+- Write `-Command <stuff>` with NO outer quotes around `<stuff>`: `-Command Get-LocalUser | Out-File C:/Users/Public/out.txt`
+- Use forward slashes in paths (`C:/Users/Public/out.txt`) to avoid doubled backslashes.
+- Do one thing per command. If you need to transform output, write it to a file and `cat` it, then think about it in your next turn.
+
+**DO NOT:**
+- Do NOT wrap `-Command` in extra quotes: `-Command 'Get-LocalUser | Out-File ...'` makes PowerShell treat the whole quoted string as a literal expression — the `Out-File` never runs and the file is never created, which then makes `cat` fail and you waste turns debugging a phantom problem.
+- Do NOT use the PowerShell format operator `-f` with `{0}`, `{1}` placeholders — e.g. `"x" -f "y"` or `-join ', ' -f '{0}'`. Every `{` / `}` adds another thing JSON has to escape and often breaks the generator.
+- Do NOT use `-join`, `-split`, `-replace`, `-match` or other string-manipulation operators inside `-Command`. Write the raw output to a file and look at it with `cat` — you don't need to transform it on the target.
+- Do NOT chain multiple cmdlets with `;` or `|` more than TWO deep. Keep pipelines short: `Get-X | Out-File ...` is fine, `Get-X | Where-Object { ... } | Select -Expand Name | Out-File ...` is already risky.
+- Do NOT write multi-line PowerShell scripts in one `-Command` argument. If you need a script, upload a `.ps1` file with `upload` and then run it.
+
+**IF YOU HIT THE llama-server ERROR:**
+- Your previous attempt was too complex. Do NOT retry the same complex command.
+- Switch to a Tier 1 native Meterpreter command (`ps`, `ls`, `getuid`, `sysinfo`, `ipconfig`, `cat`) for the next turn to reset.
+- When you come back to the task, break it into simpler steps — one cmdlet at a time, writing to a file.
 
 ### SESSION MANAGEMENT
 - To list all active sessions: `mcp-pymetasploit3__list_sessions` with args `{}`
@@ -286,6 +318,7 @@ If you catch yourself about to type a command that is NOT in TIER 1 or TIER 2, S
 6. **"stdapi_fs_stat: ... cannot find the file specified" on `ls <path>` or "stdapi_fs_chdir: ..." on `cd <path>`:** Almost always a backslash-escaping issue. Rewrite the path with FORWARD SLASHES (e.g. `cd C:/Windows/Temp` instead of `cd C:\Windows\Temp`), or break it into steps (`cd C:/` then `cd Windows` then `cd Temp`), and confirm each step with `pwd`. If the path still fails, verify it exists with `search -f <name>`.
 7. **Empty output after `cd <path>`:** That's SUCCESS, not failure. Meterpreter's `cd` returns nothing when it works. Run `pwd` to confirm you're in the new directory — DO NOT retry the `cd` with different paths assuming it failed.
 8. **`'NoneType' object has no attribute ...` errors:** Your session wrapper has crashed. Stop retrying, run `list_sessions`, and if no session is listed re-run the handler from Step 2.
+9. **`Error code: 500 - llama-server returned invalid tool call arguments ... unexpected end of JSON input`:** YOUR last command was too complex to JSON-encode safely (too many nested quotes, curly braces, format operators, or special chars). DO NOT retry the same command — it will fail the same way. See the POWERSHELL COMMAND SIMPLICITY RULES above. Switch to a short Tier 1 Meterpreter command like `ps`, `getuid`, `ls`, or `sysinfo` for the next turn, then rewrite your task as a series of simpler single-cmdlet calls.
 
 ### DONE
 When the time budget is exhausted and you have finished, output exactly DONE. Do not signal DONE early; if you think you are done, pick a NEW objective and continue.
