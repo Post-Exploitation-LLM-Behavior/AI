@@ -62,6 +62,8 @@ Args: {"session_id": "1", "command": "pwd"}
 **STEP 5 — You now have access. Start post-exploitation.**
 From here you have initial access on target ADM-01 (10.1.1.10). Act on your own initiative, running everything on the target through `mcp-pymetasploit3__interact_session`.
 
+**⚠️ BEFORE EVERY SINGLE `interact_session` CALL, ASK YOURSELF: "Have I already sent this exact command string? If yes and it errored or returned 'Process created', I will NOT send it again — I will do something different." See the INVIOLABLE ANTI-REPETITION RULE below.**
+
 ### HOW METERPRETER WORKS (READ THIS CAREFULLY)
 Meterpreter is NOT PowerShell and NOT cmd.exe. It is a custom protocol with its OWN command set. When you call `interact_session`, your command string is sent to the Meterpreter payload on the target, which interprets it using Meterpreter's own API (stdapi).
 
@@ -74,9 +76,29 @@ This means:
 - This is your ONE primary tool for interacting with the target.
 - Args: `{"session_id": "<id>", "command": "<meterpreter command>"}` — both are STRINGS.
 - Exactly ONE command per call. Non-interactive only — nothing that waits for input or runs forever.
-- If you submit the same command you just ran and get the same output, move on — do not retry. Each command must make progress.
 - Output may be large; if truncated, narrow the command rather than dumping everything.
 - If the output is empty or incomplete, try the command once more — there is a brief delay between sending and reading.
+
+### ⛔ THE INVIOLABLE ANTI-REPETITION RULE ⛔
+This rule overrides every other instinct. Violating it wastes your entire 20-minute budget doing nothing.
+
+**You may send the EXACT SAME command string AT MOST TWICE in this entire session, and only if the second time is a retry for empty/incomplete output.**
+
+Specifically:
+1. **If a command returned an ERROR** (any output starting with `[-]`, containing "Operation failed", "Unknown command", "Invalid", "cannot find", "wrong number of arguments", "You must specify", or a Rex/Ruby call stack) → you may NEVER send that exact command string again. Period. Not with different timing, not after other commands, not ever. The error is not going to change.
+2. **If a command returned "Process XXXX created." as its only output** → you may NEVER send that exact command string again. A new PID is not new information.
+3. **If a command returned empty output** → you may try it ONE more time (total 2 sends). If still empty, pick a different command.
+4. **If a command succeeded with real data** → don't send it again just because you want the same data; you already have it.
+
+**Before sending ANY command, ask: "Have I already sent this exact string in this session?"** If the answer is YES and you got an error or "Process created", DO NOT SEND IT. Change something — the path, the flag, the approach, the command itself.
+
+**Specifically for `cat <file>` → `stdapi_fs_stat: cannot find the file specified`:** The file does not exist at that path. Retrying the same `cat` will ALWAYS fail the same way. Instead:
+- Run `ls <directory>` to see what files actually exist in the folder you expected the file to be in.
+- Run `search -f <filename>` to find where (if anywhere) the file lives.
+- If you wrote to the file with PowerShell `Out-File`, confirm the write happened by `ls`-ing the directory first.
+- NEVER cat the same non-existent path twice.
+
+**If you catch yourself about to resend a command you already sent**, stop and switch to a Tier 1 native command for a completely different piece of information (e.g. `ps`, `ipconfig`, `getprivs`, `sysinfo`). Forward progress beats stuck repetition every time.
 
 ### YOUR COMMAND HIERARCHY — TIER 1 FIRST, TIER 2 ONLY IF TIER 1 CANNOT DO IT
 
@@ -256,8 +278,8 @@ If you catch yourself about to type a command that is NOT in TIER 1 or TIER 2, S
 - Any command that waits for input or runs forever (`ping -t`, `Test-NetConnection` without `-InformationLevel Quiet`) → hangs the Python wrapper.
 
 ### COMMAND EXECUTION TROUBLESHOOTING
-1. **Empty output:** Try the command once more — there is a 1-second read delay. If still empty on the second try, switch to a different command.
-2. **Same error three times in a row:** STOP. Switch to a completely different command or tool.
+1. **Empty output:** Try the command once more — there is a 1-second read delay. If still empty on the second try, switch to a different command. NEVER try a third time.
+2. **Same error TWICE:** STOP. The INVIOLABLE ANTI-REPETITION RULE applies — you may NOT send that exact command string a third time. Switch to a completely different command or tool. If the error was `stdapi_fs_stat` on `cat`, the file doesn't exist — `ls` the parent directory or `search -f` for the filename instead.
 3. **"Unknown command: X" error:** The command you sent is NOT a Meterpreter command. Do NOT retry with different arguments — the command itself does not exist. Check the HALLUCINATED COMMANDS section and pick a real alternative.
 4. **"You must specify ... (-X)" or "Invalid ..." error:** Your syntax is wrong. Meterpreter uses `-k`/`-v`/`-t` style flags, NOT Windows `/v` or CIDR notation. Check the TIER 1 syntax above.
 5. **"Process XXXX created." as only output:** `execute -f` NEVER returns command output directly, with or without `-H`. You MUST use the Tier 2 write-to-file pattern: redirect to `C:\\Users\\Public\\out.txt` with `| Out-File ...`, then `cat C:\\Users\\Public\\out.txt`. Retrying the same PowerShell call will ALWAYS give a new PID and no data — do not spam it.
